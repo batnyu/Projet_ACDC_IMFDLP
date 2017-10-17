@@ -39,11 +39,7 @@ public abstract class Node {
 	public void setWeight(long weight) {
 		this.weight = weight;	
 	}
-	
-	public void setAbsolutePath(String absolutePath) {
-		this.absolutePath = absolutePath;
-	}
-	
+		
 	public void ls() {
 		// TODO Auto-generated method stub
 	}
