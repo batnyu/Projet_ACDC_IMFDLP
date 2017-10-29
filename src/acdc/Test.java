@@ -10,13 +10,13 @@ import javax.swing.*;
 public class Test extends JFrame {
 
     public Test() throws IOException {
-        //String path2 = "D:" + File.separator;
+        String path2 = "D:" + File.separator;
         //String path2 = "C:" + File.separator + "Users" + File.separator + "Baptiste" + File.separator + "Desktop" + File.separator + "test";
-        String path2 = "C:" + File.separator + "Users" + File.separator + "Baptiste" + File.separator + "pictures";
+        //String path2 = "C:" + File.separator + "Users" + File.separator + "Baptiste" + File.separator + "pictures";
         //String path2 = "C:" + File.separator + "Users" + File.separator + "Baptiste";
 
         Filter filter = new Filter();
-        filter.addExtension("png");
+        //filter.addExtension("jpg");
         //filter.setName("Cdd");
         //filter.setLastModifiedTime("14/05/2013");
         //filter.equalsWeight(61735));

@@ -31,8 +31,8 @@ public class Filter {
 		return extensions;
 	}
 
-	public void addExtension(String extention) {
-		this.extensions.add(extention);
+	public void addExtension(String extension) {
+		this.extensions.add(extension);
 	}
 
 	public String getName() {

@@ -2,11 +2,13 @@ package acdc;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.nio.file.FileVisitResult;
 import java.nio.file.FileVisitor;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
@@ -69,7 +71,7 @@ public class FileTreeCreator implements FileVisitor<Path> {
         if (attr.isSymbolicLink()) {
             //System.out.format("Symbolic link: %s ", file);
         } else if (attr.isRegularFile()) {
-            //System.out.format("Regular file: %s ", file);
+            System.out.format("Regular file: %s \n", file);
 
             String uniqueFileHash = null;
 
@@ -124,39 +126,49 @@ public class FileTreeCreator implements FileVisitor<Path> {
         //TODO : Thread pour la collecte des doublons
         String uniqueFileHash = null;
         try {
-            //byte fileData[] = new byte[attr.size()];
-            //byte fileData[] = new byte[(int) attr.size() + Math.abs((int)attr.lastModifiedTime().toMillis()/45555)];
 
-            FileInputStream fileInput = new FileInputStream(file.toString());
-            byte fileData[] = new byte[(int) attr.size()];
-            fileInput.read(fileData);
-            fileInput.close();
+            uniqueFileHash = sampleHashFile(file);
 
-            uniqueFileHash = new BigInteger(1, messageDigest.digest(fileData)).toString(16);
             this.doublons.computeIfAbsent(uniqueFileHash, k -> new LinkedList<>())
                          .add(file.toAbsolutePath().toString());
 
-
-
-/*      List<String> list = doublons.get(uniqueFileHash);
-        if (list == null) {
-            list = new LinkedList<>();
-            doublons.put(uniqueFileHash,list);
-        }
-        list.add(file.toAbsolutePath().toString());*/
-        } catch (IOException e) {
+    /*      List<String> list = doublons.get(uniqueFileHash);
+            if (list == null) {
+                list = new LinkedList<>();
+                doublons.put(uniqueFileHash,list);
+            }
+            list.add(file.toAbsolutePath().toString());*/
+        } catch (IOException | NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
         return uniqueFileHash;
     }
 
-    private static MessageDigest messageDigest;
+    private static final int SAMPLE_SIZE = 4000;
 
-    static {
-        try {
-            messageDigest = MessageDigest.getInstance("SHA-512");
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("cannot initialize SHA-512 hash function", e);
+    private static String sampleHashFile(Path path) throws IOException, NoSuchAlgorithmException {
+
+        final long totalBytes = new java.io.File(path.toString()).length();
+
+        try(InputStream inputStream = new FileInputStream(path.toString())) {
+            MessageDigest digest = MessageDigest.getInstance("SHA-512");
+            DigestInputStream digestInputStream = new DigestInputStream(inputStream, digest);
+
+            // if the file is too short to take 3 samples, hash the entire file
+            if (totalBytes < SAMPLE_SIZE * 3) {
+                byte[] bytes = new byte[(int) totalBytes];
+                digestInputStream.read(bytes);
+            } else {
+                byte[] bytes = new byte[SAMPLE_SIZE * 3];
+                long numBytesBetweenSamples = (totalBytes - SAMPLE_SIZE * 3) / 2;
+
+                // read first, middle and last bytes
+                for (int n = 0; n < 3; n++) {
+                    digestInputStream.read(bytes, n * SAMPLE_SIZE, SAMPLE_SIZE);
+                    digestInputStream.skip(numBytesBetweenSamples);
+                }
+            }
+            return new BigInteger(1, digest.digest()).toString(16);
         }
     }
 }
