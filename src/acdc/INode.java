@@ -1,19 +1,17 @@
 package acdc;
 
-import java.io.File;
-import java.util.ArrayList;
-
 import javax.swing.tree.DefaultTreeModel;
+import java.util.ArrayList;
 
 public interface INode {
 	INode tree(String path);
 	INode tree(String path, int depth);
-	ArrayList<File> doublons();
+	ArrayList<acdc.File> doublons();
 	DefaultTreeModel treeModel();
 	String filename();
 	String hash();
 	long weight();
 	String absolutePath();
 	ArrayList<INode> child();
-	INode filter();
+	INode filter(Filter[] filters);
 }
