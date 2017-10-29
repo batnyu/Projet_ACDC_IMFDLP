@@ -1,5 +1,6 @@
 package acdc;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.file.FileVisitResult;
@@ -70,12 +71,14 @@ public class FileTreeCreator implements FileVisitor<Path> {
         } else if (attr.isRegularFile()) {
             //System.out.format("Regular file: %s ", file);
 
+            String uniqueFileHash = null;
+
             if (filter.accept(file)) {
                 if(doublonsFinder){
-                    collectDoublons(file,attr);
+                    uniqueFileHash = collectDuplicates(file,attr);
                 }
 
-                File newFile = new File(file.getFileName().toString(), attr.size(), "hash", file.toString(), attr.lastModifiedTime(), false);
+                File newFile = new File(file.getFileName().toString(), attr.size(), uniqueFileHash, file.toString(), attr.lastModifiedTime(), false);
                 dirSizeStack.push(dirSizeStack.pop() + attr.size());
                 currentDir.add(new DefaultMutableTreeNode(newFile));
             }
@@ -116,13 +119,24 @@ public class FileTreeCreator implements FileVisitor<Path> {
         return FileVisitResult.CONTINUE;
     }
 
-    private void collectDoublons(Path file, BasicFileAttributes attr) {
+
+    public String collectDuplicates(Path file,BasicFileAttributes attr) {
         //TODO : Thread pour la collecte des doublons
-        byte fileData[] = new byte[(int) attr.size()];
-        //byte fileData[] = new byte[(int) attr.size() + Math.abs((int)attr.lastModifiedTime().toMillis()/45555)];
-        String uniqueFileHash = new BigInteger(1, messageDigest.digest(fileData)).toString(16);
-        this.doublons.computeIfAbsent(uniqueFileHash, k -> new LinkedList<>())
-                .add(file.toAbsolutePath().toString());
+        String uniqueFileHash = null;
+        try {
+            //byte fileData[] = new byte[attr.size()];
+            //byte fileData[] = new byte[(int) attr.size() + Math.abs((int)attr.lastModifiedTime().toMillis()/45555)];
+
+            FileInputStream fileInput = new FileInputStream(file.toString());
+            byte fileData[] = new byte[(int) attr.size()];
+            fileInput.read(fileData);
+            fileInput.close();
+
+            uniqueFileHash = new BigInteger(1, messageDigest.digest(fileData)).toString(16);
+            this.doublons.computeIfAbsent(uniqueFileHash, k -> new LinkedList<>())
+                         .add(file.toAbsolutePath().toString());
+
+
 
 /*      List<String> list = doublons.get(uniqueFileHash);
         if (list == null) {
@@ -130,6 +144,10 @@ public class FileTreeCreator implements FileVisitor<Path> {
             doublons.put(uniqueFileHash,list);
         }
         list.add(file.toAbsolutePath().toString());*/
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return uniqueFileHash;
     }
 
     private static MessageDigest messageDigest;
@@ -141,16 +159,4 @@ public class FileTreeCreator implements FileVisitor<Path> {
             throw new RuntimeException("cannot initialize SHA-512 hash function", e);
         }
     }
-
-    //	public String buildHash(Path file) {
-//		MessageDigest md = MessageDigest.getInstance("MD5");
-//		try (InputStream is = Files.newInputStream(file);
-//		     DigestInputStream dis = new DigestInputStream(is, md)) 
-//		{
-//		  /* Read decorated stream (dis) to EOF as normal... */
-//		}
-//		byte[] digest = md.digest();
-//		
-//		return digest.toString();
-//	}
 }

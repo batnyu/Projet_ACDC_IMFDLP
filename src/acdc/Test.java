@@ -5,9 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
-import javax.swing.JFrame;
-import javax.swing.JScrollPane;
-import javax.swing.JTree;
+import javax.swing.*;
 
 public class Test extends JFrame {
 
@@ -30,25 +28,23 @@ public class Test extends JFrame {
 
         Map<String, List<String>> doublons = fileTree.getDoublons();
 
-        for (List<String> list : doublons.values()) {
-            if (list.size() > 1) {
-                System.out.println("ICI\n");
-                for (String file : list) {
+        for (Map.Entry<String, List<String>> entry : doublons.entrySet()) {
+            if(entry.getValue().size() > 1){
+                System.out.println(entry.getKey());
+                for (String file : entry.getValue()) {
                     System.out.println(file);
                 }
+                System.out.println("");
             }
+
         }
 
         JTree test = new JTree(fileTree.root);
         test.setCellRenderer(new FileTreeCellRenderer());
-//		for (int i = 0; i < test.getRowCount(); i++) {
-//			test.expandRow(i);
-//			System.out.println(i);
-//		}
 
         JScrollPane treeView = new JScrollPane(test);
         this.add(treeView);
-        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         this.setTitle("JTree Example");
         this.pack();
         this.setVisible(true);
@@ -56,9 +52,9 @@ public class Test extends JFrame {
 
     public static void main(String[] args) throws IOException {
 
-        Test fenetre = new Test();
-        fenetre.setBounds(0, 0, 600, 600);
-        fenetre.setVisible(true);
+        Test window = new Test();
+        window.setBounds(0, 0, 600, 600);
+        window.setVisible(true);
     }
 
 }
