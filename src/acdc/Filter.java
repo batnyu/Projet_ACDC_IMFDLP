@@ -21,7 +21,7 @@ public class Filter {
 	
 	public Filter() {
 		super();
-		this.extensions = new ArrayList<String>();
+		this.extensions = new ArrayList<>();
 		this.name = null;
 		this.lastModifiedTime = null;
 		this.weight = null;
@@ -71,15 +71,15 @@ public class Filter {
 			
 			int i = currentFileName.lastIndexOf('.');
 			if (i > 0) {
-				extension = currentFileName.substring(i+1);
+				extension = currentFileName.substring(i+1).toLowerCase();
 			}
 			
-			accept = extensions.contains(extension);			
+			accept = extensions.contains(extension);
 		}
 				
 		//NAME
 		if(this.name != null) {
-			accept = currentFileName.contains(this.name);
+			accept = (accept && currentFileName.contains(this.name));
 		}
 		
 		//LAST MODIFIED DATE
@@ -89,7 +89,7 @@ public class Filter {
 			SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy");
 			String currentLastModifiedDate = df.format(currentLastModifiedTime.toMillis());
 			
-			accept = currentLastModifiedDate.equals(this.lastModifiedTime);
+			accept = (accept && currentLastModifiedDate.equals(this.lastModifiedTime));
 		}
 		
 		//WEIGHT
@@ -98,11 +98,11 @@ public class Filter {
 				long currentWeight = attr.size();
 				
 				if(this.GtWeight){
-					accept = (currentWeight > this.weight);
+					accept =  accept && (currentWeight > this.weight);
 				} else if(this.LwWeight){
-					accept = (currentWeight < this.weight);
+					accept =  accept && (currentWeight < this.weight);
 				} else {
-					accept = (currentWeight == this.weight);
+					accept = accept && (currentWeight == this.weight);
 				}
 			}			
 		}
@@ -129,11 +129,7 @@ public class Filter {
     }
 
 	public boolean isEmpty() {
-		
-		if(this.getName() == null && this.getLastModifiedTime() == null && this.getWeight() == null && this.getExtensions().isEmpty()) {
-			return true;
-		} else {
-			return false;
-		}
+
+        return this.getName() == null && this.getLastModifiedTime() == null && this.getWeight() == null && this.getExtensions().isEmpty();
 	}
 }

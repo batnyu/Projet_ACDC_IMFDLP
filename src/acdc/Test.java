@@ -16,12 +16,12 @@ public class Test extends JFrame {
         //String path2 = "C:" + File.separator + "Users" + File.separator + "Baptiste";
 
         Filter filter = new Filter();
-        filter.addExtension("jpg");
+        filter.addExtension("png");
         //filter.setName("Cdd");
         //filter.setLastModifiedTime("14/05/2013");
         //filter.equalsWeight(61735));
         //filter.LwWeight(61735);
-        filter.GtWeight(61735);
+        //filter.GtWeight(61735);
 
         FileTree fileTree = new FileTree(path2, filter, true);
         fileTree.buildFileTree();
