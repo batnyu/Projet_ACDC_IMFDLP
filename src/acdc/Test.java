@@ -10,9 +10,9 @@ import javax.swing.*;
 public class Test extends JFrame {
 
     public Test() throws IOException {
-        //String path2 = "D:" + File.separator;
+        String path2 = "D:" + File.separator;
         //String path2 = "C:" + File.separator + "Users" + File.separator + "Baptiste" + File.separator + "Desktop" + File.separator + "test";
-        String path2 = "C:" + File.separator + "Users" + File.separator + "Baptiste" + File.separator + "Pictures";
+        //String path2 = "C:" + File.separator + "Users" + File.separator + "Baptiste" + File.separator + "Pictures";
         //String path2 = "C:" + File.separator + "Users" + File.separator + "Baptiste";
         //String path2 = "C:" + File.separator;
 
@@ -27,11 +27,12 @@ public class Test extends JFrame {
         long startTime = System.currentTimeMillis();
 
         FileTree fileTree = new FileTree(path2, filter, true);
-        fileTree.buildFileTree(2,3);
+        fileTree.buildFileTree(2,2);
 
 
         System.out.println("\n\n--- DOUBLONS ---\n");
         Map<String, List<String>> doublons = fileTree.getDoublons();
+        int compteur=0;
 
         for (Map.Entry<String, List<String>> entry : doublons.entrySet()) {
             if(entry.getValue().size() > 1){
@@ -40,8 +41,10 @@ public class Test extends JFrame {
                     System.out.println(file);
                 }
                 System.out.println("");
+                compteur++;
             }
         }
+        System.out.println("nb : " + compteur);
 
         //TEST OF HASH
 /*        try {

@@ -23,8 +23,6 @@ public class FileTreeCreator implements FileVisitor<Path> {
     private Filter filter;
     private boolean doublonsFinder;
 
-    Map<String, List<String>> doublons = new HashMap<>();
-
     FileTreeCreator(Filter filter, boolean doublonsFinder) {
         this.filter = filter;
         this.doublonsFinder = doublonsFinder;
@@ -77,7 +75,7 @@ public class FileTreeCreator implements FileVisitor<Path> {
 
             if (filter.accept(file)) {
                 if(doublonsFinder){
-                    uniqueFileHash = collectDuplicates(file,attr);
+                    uniqueFileHash = collectDuplicates(file);
                 }
 
                 File newFile = new File(file.getFileName().toString(), attr.size(), uniqueFileHash, file.toString(), attr.lastModifiedTime(), false);
@@ -122,14 +120,14 @@ public class FileTreeCreator implements FileVisitor<Path> {
     }
 
 
-    private String collectDuplicates(Path file,BasicFileAttributes attr) {
+    private String collectDuplicates(Path file) {
         //TODO : Thread pour la collecte des doublons
         String uniqueFileHash = null;
         try {
 
             uniqueFileHash = Hash.sampleHashFile(file.toString());
 
-            this.doublons.computeIfAbsent(uniqueFileHash, k -> new LinkedList<>())
+            FileTree.doublons.computeIfAbsent(uniqueFileHash, k -> new LinkedList<>())
                          .add(file.toAbsolutePath().toString());
 
     /*      List<String> list = doublons.get(uniqueFileHash);

@@ -18,7 +18,7 @@ public class FileTree {
     private int depth;
     private boolean doublonsFinder;
 
-    private Map<String, List<String>> doublons;
+    public static Map<String, List<String>> doublons = new HashMap<>();
 
     public FileTree(String path, Filter filter, boolean doublonsFinder) {
         this.root = new DefaultMutableTreeNode();//useless?
@@ -48,14 +48,12 @@ public class FileTree {
             FileTreeCreator ftc = new FileTreeCreator(filter, doublonsFinder);
             Files.walkFileTree(startingDir, EnumSet.allOf(FileVisitOption.class), depth, ftc);
             this.root = ftc.tree;
-            this.doublons = ftc.doublons;
         } else {
-            //Fork/Join with WalkFileTree
+            //Fork and Join with WalkFileTree
             RecursiveWalk w = new RecursiveWalk(startingDir, filter, doublonsFinder);
             final ForkJoinPool pool = new ForkJoinPool(parallelism);
             try {
                 this.root = pool.invoke(w);
-                this.doublons = w.getDoublons();
             } finally {
                 pool.shutdown();
             }

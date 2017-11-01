@@ -14,8 +14,6 @@ public class RecursiveWalk extends RecursiveTask<DefaultMutableTreeNode> {
     private Filter filter;
     private boolean doublonsFinder;
 
-    private Map<String, List<String>> doublons = new HashMap<>();
-
     private final Path dir;
     private long folderSize;
 
@@ -26,10 +24,6 @@ public class RecursiveWalk extends RecursiveTask<DefaultMutableTreeNode> {
         this.dir = dir;
         this.filter = filter;
         this.doublonsFinder = doublonsFinder;
-    }
-
-    public Map<String, List<String>> getDoublons() {
-        return doublons;
     }
 
     @Override
@@ -73,7 +67,7 @@ public class RecursiveWalk extends RecursiveTask<DefaultMutableTreeNode> {
 
                         if (filter.accept(file)) {
                             if (doublonsFinder) {
-                                uniqueFileHash = collectDuplicates(file, attrs);
+                                uniqueFileHash = collectDuplicates(file);
                             }
                             //Adding all the files in the current DIR
                             File newFile = new acdc.File(file.getFileName().toString(), attrs.size(), uniqueFileHash, file.toString(), attrs.lastModifiedTime(), false);
@@ -113,14 +107,14 @@ public class RecursiveWalk extends RecursiveTask<DefaultMutableTreeNode> {
         return tree;
     }
 
-    private String collectDuplicates(Path file, BasicFileAttributes attr) {
+    private String collectDuplicates(Path file) {
         //TODO : Thread pour la collecte des doublons
         String uniqueFileHash = null;
         try {
 
             uniqueFileHash = Hash.sampleHashFile(file.toString());
 
-            this.doublons.computeIfAbsent(uniqueFileHash, k -> new LinkedList<>())
+            FileTree.doublons.computeIfAbsent(uniqueFileHash, k -> new LinkedList<>())
                     .add(file.toAbsolutePath().toString());
 
     /*      List<String> list = doublons.get(uniqueFileHash);
