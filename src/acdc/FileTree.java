@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.ForkJoinPool;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
@@ -17,8 +18,7 @@ public class FileTree {
     private int depth;
     private boolean doublonsFinder;
 
-
-    Map<String, List<String>> doublons;
+    private Map<String, List<String>> doublons;
 
     public FileTree(String path, Filter filter, boolean doublonsFinder) {
         this.root = new DefaultMutableTreeNode();//useless?
@@ -28,7 +28,7 @@ public class FileTree {
         this.doublonsFinder = doublonsFinder;
     }
 
-    public FileTree(String path, Filter filter, int depth, boolean doublonsFinder) {
+    public FileTree(String path, Filter filter, boolean doublonsFinder, int depth) {
         this.root = null;
         this.path = path;
         this.filter = filter;
@@ -40,14 +40,27 @@ public class FileTree {
         return doublons;
     }
 
-    void buildFileTree() throws IOException {
+    void buildFileTree(int option,int parallelism) throws IOException {
         Path startingDir = Paths.get(path);
-        FileTreeCreator ftc = new FileTreeCreator(filter, doublonsFinder);
 
-        Files.walkFileTree(startingDir, EnumSet.allOf(FileVisitOption.class), depth, ftc);
+        if (option == 1) {
+            //WalkFileTree
+            FileTreeCreator ftc = new FileTreeCreator(filter, doublonsFinder);
+            Files.walkFileTree(startingDir, EnumSet.allOf(FileVisitOption.class), depth, ftc);
+            this.root = ftc.tree;
+            this.doublons = ftc.doublons;
+        } else {
+            //Fork/Join with WalkFileTree
+            RecursiveWalk w = new RecursiveWalk(startingDir, filter, doublonsFinder);
+            final ForkJoinPool pool = new ForkJoinPool(parallelism);
+            try {
+                this.root = pool.invoke(w);
+                this.doublons = w.getDoublons();
+            } finally {
+                pool.shutdown();
+            }
+        }
 
-        this.root = ftc.tree;
-        this.doublons = ftc.doublons;
 
         //Deleting empty folder when a filter is on
         if (!filter.isEmpty())
