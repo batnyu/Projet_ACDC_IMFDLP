@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ForkJoinPool;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -18,7 +19,7 @@ public class FileTree {
     private int depth;
     private boolean doublonsFinder;
 
-    public static Map<String, List<String>> doublons = new HashMap<>();
+     public static ConcurrentHashMap<String, List<String>> doublons = new ConcurrentHashMap<>();
 
     public FileTree(String path, Filter filter, boolean doublonsFinder) {
         this.root = new DefaultMutableTreeNode();//useless?
@@ -36,7 +37,7 @@ public class FileTree {
         this.doublonsFinder = doublonsFinder;
     }
 
-    public Map<String, List<String>> getDoublons() {
+    public ConcurrentHashMap<String, List<String>> getDoublons() {
         return doublons;
     }
 

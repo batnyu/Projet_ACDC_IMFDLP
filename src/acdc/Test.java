@@ -10,11 +10,11 @@ import javax.swing.*;
 public class Test extends JFrame {
 
     public Test() throws IOException {
-        String path2 = "D:" + File.separator;
+        //String path2 = "D:" + File.separator;
         //String path2 = "C:" + File.separator + "Users" + File.separator + "Baptiste" + File.separator + "Desktop" + File.separator + "test";
         //String path2 = "C:" + File.separator + "Users" + File.separator + "Baptiste" + File.separator + "Pictures";
         //String path2 = "C:" + File.separator + "Users" + File.separator + "Baptiste";
-        //String path2 = "C:" + File.separator;
+        String path2 = "C:" + File.separator;
 
         Filter filter = new Filter();
         //filter.addExtension("jpg");
@@ -27,12 +27,13 @@ public class Test extends JFrame {
         long startTime = System.currentTimeMillis();
 
         FileTree fileTree = new FileTree(path2, filter, true);
-        fileTree.buildFileTree(2,2);
+        fileTree.buildFileTree(2,3);
 
 
         System.out.println("\n\n--- DOUBLONS ---\n");
         Map<String, List<String>> doublons = fileTree.getDoublons();
         int compteur=0;
+
 
         for (Map.Entry<String, List<String>> entry : doublons.entrySet()) {
             if(entry.getValue().size() > 1){
@@ -58,6 +59,7 @@ public class Test extends JFrame {
         long stopTime = System.currentTimeMillis();
         long elapsedTime = stopTime - startTime;
         System.out.println("elapsedTime : " + elapsedTime + " ms");
+        System.out.println((double)elapsedTime/1000/60 + " minutes");
 
 
         JTree test = new JTree(fileTree.root);
