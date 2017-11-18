@@ -2,7 +2,7 @@ package acdc;
 
 import java.nio.file.attribute.FileTime;
 
-public class File {
+public class File1 {
 	
 	public String filename;
 	public long weight;
@@ -11,7 +11,7 @@ public class File {
 	public boolean isDirectory;
 	public FileTime lastModifiedTime;
 
-	public File(String filename, long weight, String hash, String absolutePath, FileTime lastModifiedTime, boolean isDirectory) {
+	public File1(String filename, long weight, String hash, String absolutePath, FileTime lastModifiedTime, boolean isDirectory) {
 		super();
 		this.filename = filename;
 		this.weight = weight;

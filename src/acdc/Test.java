@@ -3,18 +3,19 @@ package acdc;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import javax.swing.*;
 
 public class Test extends JFrame {
 
     public Test() throws IOException {
-        //String path2 = "D:" + File.separator;
-        //String path2 = "C:" + File.separator + "Users" + File.separator + "Baptiste" + File.separator + "Desktop" + File.separator + "test";
-        //String path2 = "C:" + File.separator + "Users" + File.separator + "Baptiste" + File.separator + "Pictures";
-        //String path2 = "C:" + File.separator + "Users" + File.separator + "Baptiste";
-        String path2 = "C:" + File.separator;
+        //String path2 = "D:" + File1.separator;
+        //String path2 = "C:" + File1.separator + "Users" + File1.separator + "Baptiste" + File1.separator + "Desktop" + File1.separator + "test";
+        String path2 = "C:" + File.separator + "Users" + File.separator + "Baptiste" + File.separator + "Pictures";
+        //String path2 = "C:" + File1.separator + "Users" + File1.separator + "Baptiste";
+        //String path2 = "C:" + File.separator;
+        //String path2 = "C:\\Program Files (x86)\\Steam\\SteamApps";
 
         Filter filter = new Filter();
         //filter.addExtension("jpg");
@@ -26,16 +27,16 @@ public class Test extends JFrame {
 
         long startTime = System.currentTimeMillis();
 
-        FileTree fileTree = new FileTree(path2, filter, true);
-        fileTree.buildFileTree(2,3);
+        FileTree fileTree = FileTree.createFileTree(path2, filter, false);
+        fileTree.buildFileTree(true,2);
 
 
         System.out.println("\n\n--- DOUBLONS ---\n");
-        Map<String, List<String>> doublons = fileTree.getDoublons();
+        Map<String, ConcurrentLinkedQueue<String>> doublons = fileTree.getDoublons();
         int compteur=0;
 
 
-        for (Map.Entry<String, List<String>> entry : doublons.entrySet()) {
+        for (Map.Entry<String, ConcurrentLinkedQueue<String>> entry : doublons.entrySet()) {
             if(entry.getValue().size() > 1){
                 System.out.println("hash : " + entry.getKey());
                 for (String file : entry.getValue()) {
@@ -49,7 +50,7 @@ public class Test extends JFrame {
 
         //TEST OF HASH
 /*        try {
-            //System.out.println(Hash.md5OfFile(new File("D:\\Downloads T\\Fallout.New.Vegas.Ultimate.Edition-PROPHET\\ppt-fvue.iso")));
+            //System.out.println(Hash.md5OfFile(new File1("D:\\Downloads T\\Fallout.New.Vegas.Ultimate.Edition-PROPHET\\ppt-fvue.iso")));
 
             System.out.println(Hash.sampleHashFile("D:\\Downloads T\\Fallout.New.Vegas.Ultimate.Edition-PROPHET\\ppt-fvue.iso"));
         } catch (Exception e) {

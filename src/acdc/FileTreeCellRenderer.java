@@ -25,8 +25,8 @@ class FileTreeCellRenderer extends DefaultTreeCellRenderer {
             	
             	renderer.setIcon(UIManager.getIcon("FileView.computerIcon"));
             
-            } else if (node.getUserObject() instanceof File) {
-            	File contact = (File) node.getUserObject();
+            } else if (node.getUserObject() instanceof File1) {
+            	File1 contact = (File1) node.getUserObject();
             	if (contact.isDirectory()) {
             		if (expanded) {
             			renderer.setIcon(openIcon);

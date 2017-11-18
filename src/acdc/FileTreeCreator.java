@@ -1,18 +1,16 @@
 package acdc;
 
-import java.io.FileInputStream;
+import javax.swing.tree.DefaultMutableTreeNode;
 import java.io.IOException;
-import java.io.InputStream;
-import java.math.BigInteger;
 import java.nio.file.FileVisitResult;
 import java.nio.file.FileVisitor;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.security.DigestInputStream;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
-import javax.swing.tree.DefaultMutableTreeNode;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class FileTreeCreator implements FileVisitor<Path> {
 
@@ -43,7 +41,7 @@ public class FileTreeCreator implements FileVisitor<Path> {
             simpleDir = dir.getFileName().toString();
         }
 
-        File newFolder = new File(simpleDir, 0, "hash", dir.toString(), attrs.lastModifiedTime(), true);
+        File1 newFolder = new File1(simpleDir, 0, "hash", dir.toString(), attrs.lastModifiedTime(), true);
 
         if (tree == null) {
             tree = new DefaultMutableTreeNode(newFolder);
@@ -65,11 +63,12 @@ public class FileTreeCreator implements FileVisitor<Path> {
     // each type of file.
     @Override
     public FileVisitResult visitFile(Path file, BasicFileAttributes attr) throws IOException {
+        if(Files.isReadable(file)){
 
         if (attr.isSymbolicLink()) {
             //System.out.format("Symbolic link: %s ", file);
         } else if (attr.isRegularFile()) {
-            System.out.format("Regular file: %s \n", file);
+            //System.out.format("Regular file: %s \n", file);
 
             String uniqueFileHash = null;
 
@@ -78,7 +77,7 @@ public class FileTreeCreator implements FileVisitor<Path> {
                     uniqueFileHash = collectDuplicates(file);
                 }
 
-                File newFile = new File(file.getFileName().toString(), attr.size(), uniqueFileHash, file.toString(), attr.lastModifiedTime(), false);
+                File1 newFile = new File1(file.getFileName().toString(), attr.size(), uniqueFileHash, file.toString(), attr.lastModifiedTime(), false);
                 dirSizeStack.push(dirSizeStack.pop() + attr.size());
                 currentDir.add(new DefaultMutableTreeNode(newFile));
             }
@@ -86,6 +85,8 @@ public class FileTreeCreator implements FileVisitor<Path> {
         } else {
             //System.out.format("Other: %s ", file);
         }
+        }
+
         //System.out.println("(" + attr.size() + "bytes)");
         return FileVisitResult.CONTINUE;
     }
@@ -94,7 +95,7 @@ public class FileTreeCreator implements FileVisitor<Path> {
     public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
         long size = dirSizeStack.pop();
 
-        ((File) currentDir.getUserObject()).setWeight(size);
+        ((File1) currentDir.getUserObject()).setWeight(size);
 
         if (!dirSizeStack.isEmpty()) // add this dir size to parent's size
             dirSizeStack.push(dirSizeStack.pop() + size);
@@ -115,7 +116,7 @@ public class FileTreeCreator implements FileVisitor<Path> {
     @Override
     public FileVisitResult visitFileFailed(Path file,
                                            IOException exc) {
-        exc.printStackTrace();
+        //exc.printStackTrace();
         return FileVisitResult.CONTINUE;
     }
 
@@ -127,7 +128,7 @@ public class FileTreeCreator implements FileVisitor<Path> {
 
             uniqueFileHash = Hash.sampleHashFile(file.toString());
 
-            FileTree.doublons.computeIfAbsent(uniqueFileHash, k -> new LinkedList<>())
+            FileTree.doublons.computeIfAbsent(uniqueFileHash, k -> new ConcurrentLinkedQueue<>())
                          .add(file.toAbsolutePath().toString());
 
     /*      List<String> list = doublons.get(uniqueFileHash);

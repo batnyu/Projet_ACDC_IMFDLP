@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ForkJoinPool;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -14,56 +15,53 @@ import javax.swing.tree.DefaultMutableTreeNode;
 public class FileTree {
 
     DefaultMutableTreeNode root;
-    private String path;
+    private Path path;
     private Filter filter;
     private int depth;
     private boolean doublonsFinder;
 
-     public static ConcurrentHashMap<String, List<String>> doublons = new ConcurrentHashMap<>();
+    public static ConcurrentHashMap<String, ConcurrentLinkedQueue<String>> doublons = new ConcurrentHashMap<>();
 
-    public FileTree(String path, Filter filter, boolean doublonsFinder) {
-        this.root = new DefaultMutableTreeNode();//useless?
-        this.path = path;
+    private FileTree(String path, Filter filter, boolean doublonsFinder, int depth) {
+        this.path = Paths.get(path);
         this.filter = filter;
-        this.depth = Integer.MAX_VALUE;
         this.doublonsFinder = doublonsFinder;
-    }
-
-    public FileTree(String path, Filter filter, boolean doublonsFinder, int depth) {
-        this.root = null;
-        this.path = path;
-        this.filter = filter;
         this.depth = depth;
-        this.doublonsFinder = doublonsFinder;
     }
 
-    public ConcurrentHashMap<String, List<String>> getDoublons() {
+    public ConcurrentHashMap<String, ConcurrentLinkedQueue<String>> getDoublons() {
         return doublons;
     }
 
-    void buildFileTree(int option,int parallelism) throws IOException {
-        Path startingDir = Paths.get(path);
+    public void buildFileTree(boolean singleThread, int parallelism) throws IOException {
 
-        if (option == 1) {
-            //WalkFileTree
-            FileTreeCreator ftc = new FileTreeCreator(filter, doublonsFinder);
-            Files.walkFileTree(startingDir, EnumSet.allOf(FileVisitOption.class), depth, ftc);
-            this.root = ftc.tree;
+        if (singleThread) {
+            walkFileTree();
         } else {
-            //Fork and Join with WalkFileTree
-            RecursiveWalk w = new RecursiveWalk(startingDir, filter, doublonsFinder);
-            final ForkJoinPool pool = new ForkJoinPool(parallelism);
-            try {
-                this.root = pool.invoke(w);
-            } finally {
-                pool.shutdown();
-            }
+            ForkAndJoinWalkFileTree(parallelism);
         }
-
 
         //Deleting empty folder when a filter is on
         if (!filter.isEmpty())
             this.deleteEmptyFolders();
+
+        //TODO: Clean doublons
+    }
+
+    private void walkFileTree() throws IOException {
+        FileTreeCreatorTODO ftc = new FileTreeCreatorTODO(filter, doublonsFinder);
+        Files.walkFileTree(path, EnumSet.allOf(FileVisitOption.class), depth, ftc);
+        this.root = ftc.getRootNode();
+    }
+
+    private void ForkAndJoinWalkFileTree(int parallelism) {
+        RecursiveWalk w = new RecursiveWalk(path, filter, doublonsFinder);
+        final ForkJoinPool pool = new ForkJoinPool(parallelism);
+        try {
+            this.root = pool.invoke(w);
+        } finally {
+            pool.shutdown();
+        }
     }
 
     private void deleteEmptyFolders() {
@@ -71,9 +69,9 @@ public class FileTree {
 
         while (en.hasMoreElements()) {
             DefaultMutableTreeNode node = en.nextElement();
-            //System.out.println("machin : " + ((File) node.getUserObject()).filename + " " + ((File) node.getUserObject()).weight);
+            //System.out.println("machin : " + ((File1) node.getUserObject()).filename + " " + ((File1) node.getUserObject()).weight);
             //Avoiding loop if node is empty
-            if (((File) node.getUserObject()).weight == 0 && !node.isRoot()) {
+            if (((File1) node.getUserObject()).weight == 0 && !node.isRoot()) {
                 node.removeAllChildren();
                 node.removeFromParent();
                 //Modifying the tree by removing a node invalidates any enumerations created before the modification
@@ -82,5 +80,15 @@ public class FileTree {
             }
 
         }
+    }
+
+    //Fabriques statiques
+
+    public static FileTree createFileTree(String path, Filter filter, boolean doublonsFinder) {
+        return new FileTree(path, filter, doublonsFinder, Integer.MAX_VALUE);
+    }
+
+    public static FileTree createFileTreeWithLimitedDepth(String path, Filter filter, boolean doublonsFinder, int depth) {
+        return new FileTree(path, filter, doublonsFinder, depth);
     }
 }
