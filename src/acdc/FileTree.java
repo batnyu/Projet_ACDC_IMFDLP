@@ -49,7 +49,7 @@ public class FileTree {
     }
 
     private void walkFileTree() throws IOException {
-        FileTreeCreatorTODO ftc = new FileTreeCreatorTODO(filter, doublonsFinder);
+        FileTreeCreator ftc = new FileTreeCreator(filter, doublonsFinder);
         Files.walkFileTree(path, EnumSet.allOf(FileVisitOption.class), depth, ftc);
         this.root = ftc.getRootNode();
     }

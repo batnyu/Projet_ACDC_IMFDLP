@@ -26,6 +26,10 @@ public class FileTreeCreator implements FileVisitor<Path> {
         this.doublonsFinder = doublonsFinder;
     }
 
+    public DefaultMutableTreeNode getRootNode() {
+        return tree;
+    }
+
     @Override
     public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
         //System.out.format("Directory: %s%n", dir);

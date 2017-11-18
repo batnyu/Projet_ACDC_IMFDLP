@@ -12,9 +12,9 @@ public class Test extends JFrame {
     public Test() throws IOException {
         //String path2 = "D:" + File1.separator;
         //String path2 = "C:" + File1.separator + "Users" + File1.separator + "Baptiste" + File1.separator + "Desktop" + File1.separator + "test";
-        String path2 = "C:" + File.separator + "Users" + File.separator + "Baptiste" + File.separator + "Pictures";
+        //String path2 = "C:" + File.separator + "Users" + File.separator + "Baptiste" + File.separator + "Pictures";
         //String path2 = "C:" + File1.separator + "Users" + File1.separator + "Baptiste";
-        //String path2 = "C:" + File.separator;
+        String path2 = "C:" + File.separator;
         //String path2 = "C:\\Program Files (x86)\\Steam\\SteamApps";
 
         Filter filter = new Filter();
