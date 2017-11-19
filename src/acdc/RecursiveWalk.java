@@ -18,14 +18,16 @@ public class RecursiveWalk extends RecursiveTask<DefaultMutableTreeNode> {
     private boolean doublonsFinder;
 
     private final Path dir;
+    private int pathNameCount;
     private int maxDepth;
     private long folderSize;
 
     private DefaultMutableTreeNode tree;
     private DefaultMutableTreeNode currentDir;
 
-    public RecursiveWalk(Path dir, int maxDepth, Filter filter, boolean doublonsFinder) {
+    public RecursiveWalk(Path dir, int pathNameCount, int maxDepth, Filter filter, boolean doublonsFinder) {
         this.dir = dir;
+        this.pathNameCount = pathNameCount;
         this.maxDepth = maxDepth;
         this.filter = filter;
         this.doublonsFinder = doublonsFinder;
@@ -42,7 +44,7 @@ public class RecursiveWalk extends RecursiveTask<DefaultMutableTreeNode> {
                     if (!dir.equals(RecursiveWalk.this.dir)) {
                         // Look at the number of levels of the current dir
                         if (isBelowMaxDepth(dir)) {
-                            RecursiveWalk w = new RecursiveWalk(dir, maxDepth, filter, doublonsFinder);
+                            RecursiveWalk w = new RecursiveWalk(dir, pathNameCount, maxDepth, filter, doublonsFinder);
                             w.fork();
                             walks.add(w);
                             //System.out.println("SUBFOLDER  : " + dir + "\t" + Thread.currentThread());
@@ -119,7 +121,7 @@ public class RecursiveWalk extends RecursiveTask<DefaultMutableTreeNode> {
     }
 
     private boolean isBelowMaxDepth(Path file) {
-        return file.getNameCount() <= maxDepth;
+        return file.getNameCount() - pathNameCount <= maxDepth;
     }
 
     private String collectDuplicates(Path file) {

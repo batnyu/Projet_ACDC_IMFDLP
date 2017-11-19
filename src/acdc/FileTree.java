@@ -18,6 +18,7 @@ public class FileTree {
 
     DefaultMutableTreeNode root;
     private Path path;
+    private int pathNameCount;
     private Filter filter;
     private int maxDepth;
     private boolean doublonsFinder;
@@ -26,6 +27,7 @@ public class FileTree {
 
     private FileTree(String path, Filter filter, boolean doublonsFinder, int maxDepth) {
         this.path = Paths.get(path);
+        this.pathNameCount = this.path.getNameCount();
         this.filter = filter;
         this.doublonsFinder = doublonsFinder;
         this.maxDepth = maxDepth;
@@ -47,7 +49,7 @@ public class FileTree {
     }
 
     private void ForkAndJoinWalkFileTree(int parallelism) {
-        RecursiveWalk w = new RecursiveWalk(path, maxDepth, filter, doublonsFinder);
+        RecursiveWalk w = new RecursiveWalk(path, pathNameCount, maxDepth, filter, doublonsFinder);
         final ForkJoinPool pool = new ForkJoinPool(parallelism);
         try {
             this.root = pool.invoke(w);

@@ -10,11 +10,11 @@ import javax.swing.*;
 public class Test extends JFrame {
 
     public Test() throws IOException {
-        //String path2 = "D:" + File.separator;
+        String path2 = "D:" + File.separator;
         //String path2 = "C:" + File.separator + "Users" + File.separator + "Baptiste" + File.separator + "Desktop" + File.separator + "test";
         //String path2 = "C:" + File.separator + "Users" + File.separator + "Baptiste" + File.separator + "Pictures";
         //String path2 = "C:" + File.separator + "Users" + File.separator + "Baptiste";
-        String path2 = "C:" + File.separator;
+        //String path2 = "C:" + File.separator;
         //String path2 = "C:\\Program Files (x86)\\Steam\\SteamApps";
         //String path2 = "C:\\Program Files (x86)";
 
@@ -28,8 +28,8 @@ public class Test extends JFrame {
 
         long startTime = System.currentTimeMillis();
 
-        FileTree fileTree = FileTree.createFileTree(path2, filter, false);
-        //FileTree fileTree = FileTree.createFileTreeWithLimitedDepth(path2, filter, false, 2);
+        //FileTree fileTree = FileTree.createFileTree(path2, filter, false);
+        FileTree fileTree = FileTree.createFileTreeWithLimitedDepth(path2, filter, false, 2);
         fileTree.buildFileTree(1);
 
 
