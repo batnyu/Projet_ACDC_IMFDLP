@@ -42,8 +42,8 @@ public class FileTree {
         ForkAndJoinWalkFileTree(parallelism);
 
         //Deleting empty folder when a filter is on
-        if (!filter.isEmpty())
-            this.deleteEmptyFolders();
+/*        if (!filter.isEmpty())
+            this.deleteEmptyFolders();*/
 
         //TODO: Clean doublons
     }

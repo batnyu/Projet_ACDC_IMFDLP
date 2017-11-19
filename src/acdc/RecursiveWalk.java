@@ -75,12 +75,12 @@ public class RecursiveWalk extends RecursiveTask<DefaultMutableTreeNode> {
                         String uniqueFileHash = "hash";
 
                         if (filter.accept(file)) {
-                            if (doublonsFinder) {
-                                uniqueFileHash = collectDuplicates(file);
-                            }
-                            //Adding all the files in the current DIR
-                            File1 newFile = new File1(file.getFileName().toString(), attrs.size(), uniqueFileHash, file.toString(), attrs.lastModifiedTime(), false);
                             if (isBelowMaxDepth(file)) {
+                                if (doublonsFinder) {
+                                    uniqueFileHash = collectDuplicates(file);
+                                }
+                                //Adding all the files in the current DIR
+                                File1 newFile = new File1(file.getFileName().toString(), attrs.size(), uniqueFileHash, file.toString(), attrs.lastModifiedTime(), false);
                                 currentDir.add(new DefaultMutableTreeNode(newFile));
                             }
                             folderSize += attrs.size();
@@ -109,14 +109,20 @@ public class RecursiveWalk extends RecursiveTask<DefaultMutableTreeNode> {
         long somme = folderSize;
         for (RecursiveWalk w : walks) {
             //Loop through subfolders and adding them to the parent
-            if (isBelowMaxDepth(w.dir))
-                tree.add(w.join());
+            if (isBelowMaxDepth(w.dir)) {
+                if(filterIsActiveAndFolderIsNotEmptyOrfilterIsNotActive(w))
+                    tree.add(w.join());
+            }
             //Adding the size of the subfolders to join with the size of the files.
             somme = somme + ((File1) (w.join()).getUserObject()).getWeight();
         }
         //Setting the parent folder size.
         ((File1) tree.getUserObject()).setWeight(somme);
         return tree;
+    }
+
+    private boolean filterIsActiveAndFolderIsNotEmptyOrfilterIsNotActive(RecursiveWalk w) {
+        return ((File1) (w.join()).getUserObject()).getWeight() != 0 && !filter.isEmpty() || filter.isEmpty();
     }
 
     private boolean isBelowMaxDepth(Path file) {

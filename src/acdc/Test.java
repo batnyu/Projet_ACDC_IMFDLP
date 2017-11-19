@@ -19,7 +19,7 @@ public class Test extends JFrame {
         //String path2 = "C:\\Program Files (x86)";
 
         Filter filter = new Filter();
-        //filter.addExtension("jpg");
+        //filter.addExtension("mkv");
         //filter.setName("Cdd");
         //filter.setLastModifiedTime("14/05/2013");
         //filter.equalsWeight(61735));
