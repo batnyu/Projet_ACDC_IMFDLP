@@ -1,6 +1,7 @@
 package acdc;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -9,6 +10,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
@@ -17,29 +19,25 @@ public class FileTree {
     DefaultMutableTreeNode root;
     private Path path;
     private Filter filter;
-    private int depth;
+    private int maxDepth;
     private boolean doublonsFinder;
 
     public static ConcurrentHashMap<String, ConcurrentLinkedQueue<String>> doublons = new ConcurrentHashMap<>();
 
-    private FileTree(String path, Filter filter, boolean doublonsFinder, int depth) {
+    private FileTree(String path, Filter filter, boolean doublonsFinder, int maxDepth) {
         this.path = Paths.get(path);
         this.filter = filter;
         this.doublonsFinder = doublonsFinder;
-        this.depth = depth;
+        this.maxDepth = maxDepth;
     }
 
     public ConcurrentHashMap<String, ConcurrentLinkedQueue<String>> getDoublons() {
         return doublons;
     }
 
-    public void buildFileTree(boolean singleThread, int parallelism) throws IOException {
+    public void buildFileTree(int parallelism) throws IOException {
 
-        if (singleThread) {
-            walkFileTree();
-        } else {
-            ForkAndJoinWalkFileTree(parallelism);
-        }
+        ForkAndJoinWalkFileTree(parallelism);
 
         //Deleting empty folder when a filter is on
         if (!filter.isEmpty())
@@ -48,14 +46,8 @@ public class FileTree {
         //TODO: Clean doublons
     }
 
-    private void walkFileTree() throws IOException {
-        FileTreeCreator ftc = new FileTreeCreator(filter, doublonsFinder);
-        Files.walkFileTree(path, EnumSet.allOf(FileVisitOption.class), depth, ftc);
-        this.root = ftc.getRootNode();
-    }
-
     private void ForkAndJoinWalkFileTree(int parallelism) {
-        RecursiveWalk w = new RecursiveWalk(path, filter, doublonsFinder);
+        RecursiveWalk w = new RecursiveWalk(path, maxDepth, filter, doublonsFinder);
         final ForkJoinPool pool = new ForkJoinPool(parallelism);
         try {
             this.root = pool.invoke(w);
@@ -88,7 +80,7 @@ public class FileTree {
         return new FileTree(path, filter, doublonsFinder, Integer.MAX_VALUE);
     }
 
-    public static FileTree createFileTreeWithLimitedDepth(String path, Filter filter, boolean doublonsFinder, int depth) {
-        return new FileTree(path, filter, doublonsFinder, depth);
+    public static FileTree createFileTreeWithLimitedDepth(String path, Filter filter, boolean doublonsFinder, int maxDepth) {
+        return new FileTree(path, filter, doublonsFinder, maxDepth);
     }
 }
