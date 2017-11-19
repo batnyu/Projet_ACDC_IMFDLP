@@ -43,12 +43,10 @@ public class RecursiveWalk extends RecursiveTask<DefaultMutableTreeNode> {
                     //Create another instance for each folder in dir
                     if (!dir.equals(RecursiveWalk.this.dir)) {
                         // Look at the number of levels of the current dir
-                        if (isBelowMaxDepth(dir)) {
-                            RecursiveWalk w = new RecursiveWalk(dir, pathNameCount, maxDepth, filter, doublonsFinder);
-                            w.fork();
-                            walks.add(w);
-                            //System.out.println("SUBFOLDER  : " + dir + "\t" + Thread.currentThread());
-                        }
+                        RecursiveWalk w = new RecursiveWalk(dir, pathNameCount, maxDepth, filter, doublonsFinder);
+                        w.fork();
+                        walks.add(w);
+                        //System.out.println("SUBFOLDER  : " + dir + "\t" + Thread.currentThread());
                         return FileVisitResult.SKIP_SUBTREE;
                     } else {
                         //Creating the dir node
@@ -71,21 +69,21 @@ public class RecursiveWalk extends RecursiveTask<DefaultMutableTreeNode> {
 
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                    if (isBelowMaxDepth(file)) {
-                        if (attrs.isRegularFile()) {
-                            //System.out.println(Thread.currentThread() + "\t" + file);
+                    if (attrs.isRegularFile()) {
+                        //System.out.println(Thread.currentThread() + "\t" + file);
 
-                            String uniqueFileHash = "hash";
+                        String uniqueFileHash = "hash";
 
-                            if (filter.accept(file)) {
-                                if (doublonsFinder) {
-                                    uniqueFileHash = collectDuplicates(file);
-                                }
-                                //Adding all the files in the current DIR
-                                File1 newFile = new File1(file.getFileName().toString(), attrs.size(), uniqueFileHash, file.toString(), attrs.lastModifiedTime(), false);
-                                currentDir.add(new DefaultMutableTreeNode(newFile));
-                                folderSize += attrs.size();
+                        if (filter.accept(file)) {
+                            if (doublonsFinder) {
+                                uniqueFileHash = collectDuplicates(file);
                             }
+                            //Adding all the files in the current DIR
+                            File1 newFile = new File1(file.getFileName().toString(), attrs.size(), uniqueFileHash, file.toString(), attrs.lastModifiedTime(), false);
+                            if (isBelowMaxDepth(file)) {
+                                currentDir.add(new DefaultMutableTreeNode(newFile));
+                            }
+                            folderSize += attrs.size();
                         }
                     }
                     return FileVisitResult.CONTINUE;
@@ -111,7 +109,8 @@ public class RecursiveWalk extends RecursiveTask<DefaultMutableTreeNode> {
         long somme = folderSize;
         for (RecursiveWalk w : walks) {
             //Loop through subfolders and adding them to the parent
-            tree.add(w.join());
+            if (isBelowMaxDepth(w.dir))
+                tree.add(w.join());
             //Adding the size of the subfolders to join with the size of the files.
             somme = somme + ((File1) (w.join()).getUserObject()).getWeight();
         }
