@@ -6,13 +6,15 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import javax.swing.*;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
 
 public class Test extends JFrame {
 
     public Test() throws IOException {
-        String path2 = "D:" + File.separator;
+        //String path2 = "D:" + File.separator;
         //String path2 = "C:" + File.separator + "Users" + File.separator + "Baptiste" + File.separator + "Desktop" + File.separator + "test";
-        //String path2 = "C:" + File.separator + "Users" + File.separator + "Baptiste" + File.separator + "Pictures";
+        String path2 = "C:" + File.separator + "Users" + File.separator + "Baptiste" + File.separator + "Pictures";
         //String path2 = "C:" + File.separator + "Users" + File.separator + "Baptiste";
         //String path2 = "C:" + File.separator;
         //String path2 = "C:\\Program Files (x86)\\Steam\\SteamApps";
@@ -20,6 +22,7 @@ public class Test extends JFrame {
 
         Filter filter = new Filter();
         //filter.addExtension("mkv");
+        //filter.addExtension("txt");
         //filter.setName("Cdd");
         //filter.setLastModifiedTime("14/05/2013");
         //filter.equalsWeight(61735));
@@ -28,10 +31,9 @@ public class Test extends JFrame {
 
         long startTime = System.currentTimeMillis();
 
-        //FileTree fileTree = FileTree.createFileTree(path2, filter, false);
-        FileTree fileTree = FileTree.createFileTreeWithLimitedDepth(path2, filter, false, 2);
+        FileTree fileTree = FileTree.createFileTree(path2, filter, false);
+        //FileTree fileTree = FileTree.createFileTreeWithLimitedDepth(path2, filter, false, 2);
         fileTree.buildFileTree(1);
-
 
         System.out.println("\n\n--- DOUBLONS ---\n");
         Map<String, ConcurrentLinkedQueue<String>> doublons = fileTree.getDoublons();
@@ -65,7 +67,7 @@ public class Test extends JFrame {
         System.out.println((double)elapsedTime/1000/60 + " minutes");
 
 
-        JTree test = new JTree(fileTree.root);
+        JTree test = new JTree(new FileTreeModel(fileTree.root));
         test.setCellRenderer(new FileTreeCellRenderer());
 
         JScrollPane treeView = new JScrollPane(test);

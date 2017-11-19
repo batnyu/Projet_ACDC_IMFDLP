@@ -8,5 +8,10 @@
     </content>
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="inheritedJdk" />
+    <orderEntry type="library" name="gson-2.6.2" level="project" />
+    <orderEntry type="library" name="json-path-2.4.0" level="project" />
+    <orderEntry type="library" name="accessors-smart-1.2" level="project" />
+    <orderEntry type="library" name="accessors-smart-1.2" level="project" />
+    <orderEntry type="library" name="asm-5.0.4" level="project" />
   </component>
 </module>

@@ -73,7 +73,6 @@ public class FileTreeCreator implements FileVisitor<Path> {
             //System.out.format("Symbolic link: %s ", file);
         } else if (attr.isRegularFile()) {
             //System.out.format("Regular file: %s \n", file);
-
             String uniqueFileHash = null;
 
             if (filter.accept(file)) {

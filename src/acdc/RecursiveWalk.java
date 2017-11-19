@@ -1,8 +1,14 @@
 package acdc;
 
+import com.google.gson.stream.JsonReader;
+import com.jayway.jsonpath.Configuration;
+import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.Option;
+
 import javax.swing.tree.DefaultMutableTreeNode;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.NoSuchAlgorithmException;
@@ -11,30 +17,36 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.RecursiveTask;
+import java.util.regex.Pattern;
 
-public class RecursiveWalk extends RecursiveTask<DefaultMutableTreeNode> {
+import static sun.plugin.javascript.navig.JSType.Option;
+
+public class RecursiveWalk extends RecursiveTask<File1> {
 
     private Filter filter;
     private boolean doublonsFinder;
+    private PrintWriter writer;
 
     private final Path dir;
     private int pathNameCount;
     private int maxDepth;
     private long folderSize;
 
-    private DefaultMutableTreeNode tree;
-    private DefaultMutableTreeNode currentDir;
 
-    public RecursiveWalk(Path dir, int pathNameCount, int maxDepth, Filter filter, boolean doublonsFinder) {
+    private File1 tree;
+    private File1 currentDir;
+
+    public RecursiveWalk(Path dir, int pathNameCount, int maxDepth, Filter filter, boolean doublonsFinder, PrintWriter writer) {
         this.dir = dir;
         this.pathNameCount = pathNameCount;
         this.maxDepth = maxDepth;
         this.filter = filter;
         this.doublonsFinder = doublonsFinder;
+        this.writer = writer;
     }
 
     @Override
-    protected DefaultMutableTreeNode compute() {
+    protected File1 compute() {
         final List<RecursiveWalk> walks = new ArrayList<>();
         try {
             Files.walkFileTree(dir, EnumSet.allOf(FileVisitOption.class), Integer.MAX_VALUE, new SimpleFileVisitor<Path>() {
@@ -43,7 +55,7 @@ public class RecursiveWalk extends RecursiveTask<DefaultMutableTreeNode> {
                     //Create another instance for each folder in dir
                     if (!dir.equals(RecursiveWalk.this.dir)) {
                         // Look at the number of levels of the current dir
-                        RecursiveWalk w = new RecursiveWalk(dir, pathNameCount, maxDepth, filter, doublonsFinder);
+                        RecursiveWalk w = new RecursiveWalk(dir, pathNameCount, maxDepth, filter, doublonsFinder, writer);
                         w.fork();
                         walks.add(w);
                         //System.out.println("SUBFOLDER  : " + dir + "\t" + Thread.currentThread());
@@ -60,8 +72,8 @@ public class RecursiveWalk extends RecursiveTask<DefaultMutableTreeNode> {
                             simpleDir = dir.getFileName().toString();
                         }
 
-                        File1 newFolder = new File1(simpleDir, 0, "hash", dir.toString(), attrs.lastModifiedTime(), true);
-                        tree = new DefaultMutableTreeNode(newFolder);
+                        //File1 newFolder = new File1(simpleDir, 0, "hash", dir.toString(), attrs.lastModifiedTime(), true);
+                        tree = new File1(simpleDir, 0, "hash", dir.toString(), attrs.lastModifiedTime(), true);
                         currentDir = tree;
                         return FileVisitResult.CONTINUE;
                     }
@@ -79,9 +91,42 @@ public class RecursiveWalk extends RecursiveTask<DefaultMutableTreeNode> {
                                 if (doublonsFinder) {
                                     uniqueFileHash = collectDuplicates(file);
                                 }
+
+                                //TODO: ADD TO JSON FILE
+
+                                String json = "cache.json";
+                                //Configuration conf = Configuration.defaultConfiguration().addOptions(Option.DEFAULT_PATH_LEAF_TO_NULL);
+                                Configuration conf = Configuration.defaultConfiguration();
+                                Object document = conf.jsonProvider().parse(json);
+
+                                String pattern = Pattern.quote(System.getProperty("file.separator"));
+                                String[] levels = file.toString().split(pattern);
+                                System.out.println(file.toString());
+
+                                System.out.println("rootpath = " + FileTree.rootPath);
+                                String[] rootPath = FileTree.rootPath.split(pattern);
+                                int debut = rootPath.length;
+                                int machin = file.getNameCount() - file.getParent().getNameCount();
+                                System.out.println(debut);
+                                System.out.println(machin);
+                                System.out.println(levels.length);
+
+                                StringBuilder jsonPath = new StringBuilder("$");
+                                for (int i = debut; i < debut + machin; i++) {
+                                    jsonPath.append(".children");
+                                    jsonPath.append("[?(@.filename == '" + levels[i] + "')]");
+                                }
+                                jsonPath.append(".lastModifiedTime.value");
+                                System.out.println(jsonPath.toString());
+
+                                String timestamp = JsonPath.read(document, jsonPath.toString());
+                                System.out.println(timestamp);
+
+                                //$.children[?(@.filename == "19268_1333773742162_6130659_n - Copie.jpg")].lastModifiedTime.value
+
                                 //Adding all the files in the current DIR
                                 File1 newFile = new File1(file.getFileName().toString(), attrs.size(), uniqueFileHash, file.toString(), attrs.lastModifiedTime(), false);
-                                currentDir.add(new DefaultMutableTreeNode(newFile));
+                                currentDir.add(newFile);
                             }
                             folderSize += attrs.size();
                         }
@@ -91,8 +136,9 @@ public class RecursiveWalk extends RecursiveTask<DefaultMutableTreeNode> {
 
                 @Override
                 public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                    //USELESS
                     //Setting the size of all the files in the folder
-                    ((File1) currentDir.getUserObject()).setWeight(folderSize);
+                    //currentDir.setWeight(folderSize);
                     return FileVisitResult.CONTINUE;
                 }
 
@@ -110,19 +156,20 @@ public class RecursiveWalk extends RecursiveTask<DefaultMutableTreeNode> {
         for (RecursiveWalk w : walks) {
             //Loop through subfolders and adding them to the parent
             if (isBelowMaxDepth(w.dir)) {
-                if(filterIsActiveAndFolderIsNotEmptyOrfilterIsNotActive(w))
+                if (filterIsActiveAndFolderIsNotEmptyOrfilterIsNotActive(w))
                     tree.add(w.join());
             }
             //Adding the size of the subfolders to join with the size of the files.
-            somme = somme + ((File1) (w.join()).getUserObject()).getWeight();
+            somme = somme + (w.join()).getWeight();
         }
         //Setting the parent folder size.
-        ((File1) tree.getUserObject()).setWeight(somme);
+        tree.setWeight(somme);
+
         return tree;
     }
 
     private boolean filterIsActiveAndFolderIsNotEmptyOrfilterIsNotActive(RecursiveWalk w) {
-        return ((File1) (w.join()).getUserObject()).getWeight() != 0 && !filter.isEmpty() || filter.isEmpty();
+        return (w.join()).getWeight() != 0 && !filter.isEmpty() || filter.isEmpty();
     }
 
     private boolean isBelowMaxDepth(Path file) {
