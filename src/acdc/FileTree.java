@@ -58,13 +58,13 @@ public class FileTree {
 
         ForkAndJoinWalkFileTree(parallelism, null);
 
-        PrintWriter writer = new PrintWriter("./cache.json", "UTF-8");
+/*        PrintWriter writer = new PrintWriter("./cache.json", "UTF-8");
 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         JsonElement jsonElement = gson.toJsonTree(this.root);
 
         writer.append(jsonElement.toString());
-        writer.close();
+        writer.close();*/
 
         //Deleting empty folder when a filter is on
 /*        if (!filter.isEmpty())

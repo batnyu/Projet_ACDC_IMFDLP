@@ -1,6 +1,8 @@
 package acdc;
 
 import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import com.google.gson.stream.JsonWriter;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
@@ -19,6 +21,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.RecursiveTask;
 import java.util.regex.Pattern;
 
+import static com.jayway.jsonpath.Option.DEFAULT_PATH_LEAF_TO_NULL;
 import static sun.plugin.javascript.navig.JSType.Option;
 
 public class RecursiveWalk extends RecursiveTask<File1> {
@@ -94,11 +97,6 @@ public class RecursiveWalk extends RecursiveTask<File1> {
 
                                 //TODO: ADD TO JSON FILE
 
-                                String json = "cache.json";
-                                //Configuration conf = Configuration.defaultConfiguration().addOptions(Option.DEFAULT_PATH_LEAF_TO_NULL);
-                                Configuration conf = Configuration.defaultConfiguration();
-                                Object document = conf.jsonProvider().parse(json);
-
                                 String pattern = Pattern.quote(System.getProperty("file.separator"));
                                 String[] levels = file.toString().split(pattern);
                                 System.out.println(file.toString());
@@ -107,6 +105,15 @@ public class RecursiveWalk extends RecursiveTask<File1> {
                                 String[] rootPath = FileTree.rootPath.split(pattern);
                                 int debut = rootPath.length;
                                 int machin = file.getNameCount() - file.getParent().getNameCount();
+
+                                CacheUpdate cacheUpdate = new CacheUpdate(rootPath,attrs.lastModifiedTime().toMillis());
+                                cacheUpdate.readJsonStream();
+
+/*                                String json = "cache.json";
+                                Configuration conf = Configuration.defaultConfiguration().addOptions(DEFAULT_PATH_LEAF_TO_NULL);
+                                Object document = conf.jsonProvider().parse(json);
+
+
                                 System.out.println(debut);
                                 System.out.println(machin);
                                 System.out.println(levels.length);
@@ -120,7 +127,7 @@ public class RecursiveWalk extends RecursiveTask<File1> {
                                 System.out.println(jsonPath.toString());
 
                                 String timestamp = JsonPath.read(document, jsonPath.toString());
-                                System.out.println(timestamp);
+                                System.out.println(timestamp);*/
 
                                 //$.children[?(@.filename == "19268_1333773742162_6130659_n - Copie.jpg")].lastModifiedTime.value
 
