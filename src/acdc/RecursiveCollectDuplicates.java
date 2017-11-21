@@ -15,19 +15,17 @@ import java.util.concurrent.RecursiveTask;
 public class RecursiveCollectDuplicates extends RecursiveAction {
 
     private Filter filter;
-    private boolean doublonsFinder;
     private PrintWriter writer;
 
     private final Path dir;
     private int pathNameCount;
     private int maxDepth;
 
-    public RecursiveCollectDuplicates(Path dir, int pathNameCount, int maxDepth, Filter filter, boolean doublonsFinder, PrintWriter writer) {
+    public RecursiveCollectDuplicates(Path dir, int pathNameCount, int maxDepth, Filter filter, PrintWriter writer) {
         this.dir = dir;
         this.pathNameCount = pathNameCount;
         this.maxDepth = maxDepth;
         this.filter = filter;
-        this.doublonsFinder = doublonsFinder;
         this.writer = writer;
     }
 
@@ -41,7 +39,7 @@ public class RecursiveCollectDuplicates extends RecursiveAction {
                     //Create another instance for each folder in dir
                     if (!dir.equals(RecursiveCollectDuplicates.this.dir)) {
                         // Look at the number of levels of the current dir
-                        RecursiveCollectDuplicates w = new RecursiveCollectDuplicates(dir, pathNameCount, maxDepth, filter, doublonsFinder, writer);
+                        RecursiveCollectDuplicates w = new RecursiveCollectDuplicates(dir, pathNameCount, maxDepth, filter, writer);
                         w.fork();
                         walks.add(w);
                         return FileVisitResult.SKIP_SUBTREE;
@@ -59,7 +57,7 @@ public class RecursiveCollectDuplicates extends RecursiveAction {
 
                         if (filter.accept(file)) {
                             if (isBelowMaxDepth(file)) {
-                                collectDuplicates(file);
+                                collectDuplicates(file,attrs.size());
                             }
 
                         }
@@ -95,12 +93,13 @@ public class RecursiveCollectDuplicates extends RecursiveAction {
         return file.getNameCount() - pathNameCount <= maxDepth;
     }
 
-    private String collectDuplicates(Path file) {
-        //TODO : Thread pour la collecte des doublons
+    private String collectDuplicates(Path file, long size) {
         String uniqueFileHash = null;
         try {
-
-            uniqueFileHash = Hash.sampleHashFile(file.toString());
+            //quick but errors can happen
+            uniqueFileHash = Hash.sampleHashFile(file.toString()) + size;
+            //very long but no error
+            //uniqueFileHash = Hash.md5OfFile(file.toFile());
 
             FileTree.doublons.computeIfAbsent(uniqueFileHash, k -> new ConcurrentLinkedQueue<>())
                     .add(file.toFile());
@@ -112,6 +111,8 @@ public class RecursiveCollectDuplicates extends RecursiveAction {
             }
             list.add(file.toAbsolutePath().toString());*/
         } catch (IOException | NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return uniqueFileHash;

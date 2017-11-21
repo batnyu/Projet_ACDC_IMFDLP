@@ -84,7 +84,7 @@ public class FileTree {
 
 
     private void ForkAndJoinWalkFileTree(int parallelism, int maxDepth, PrintWriter writer) {
-        RecursiveWalk w = new RecursiveWalk(path, pathNameCount, maxDepth, filter, false, writer);
+        RecursiveWalk w = new RecursiveWalk(path, pathNameCount, maxDepth, filter, writer);
         final ForkJoinPool pool = new ForkJoinPool(parallelism);
         try {
             this.root = pool.invoke(w);
@@ -95,10 +95,10 @@ public class FileTree {
 
     private void ForkAndJoinWalkFileTreeGetDoublons(String pathStr, int parallelism, int maxDepth, PrintWriter writer) {
         Path path = Paths.get(pathStr);
-        RecursiveWalk w = new RecursiveWalk(path, pathNameCount, maxDepth, filter, true, writer);
+        RecursiveCollectDuplicates w = new RecursiveCollectDuplicates(path, pathNameCount, maxDepth, filter, writer);
         final ForkJoinPool pool = new ForkJoinPool(parallelism);
         try {
-            File1 root = pool.invoke(w);
+            pool.invoke(w);
         } finally {
             pool.shutdown();
         }
