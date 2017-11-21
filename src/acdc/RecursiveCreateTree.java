@@ -1,30 +1,14 @@
 package acdc;
 
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonToken;
-import com.google.gson.stream.JsonWriter;
-import com.jayway.jsonpath.Configuration;
-import com.jayway.jsonpath.JsonPath;
-import com.jayway.jsonpath.Option;
-
-import javax.swing.tree.DefaultMutableTreeNode;
 import java.io.*;
-import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.RecursiveTask;
-import java.util.regex.Pattern;
 
-import static com.jayway.jsonpath.Option.DEFAULT_PATH_LEAF_TO_NULL;
-import static sun.plugin.javascript.navig.JSType.Option;
-
-public class RecursiveWalk extends RecursiveTask<File1> {
+public class RecursiveCreateTree extends RecursiveTask<File1> {
 
     private Filter filter;
     private PrintWriter writer;
@@ -38,7 +22,7 @@ public class RecursiveWalk extends RecursiveTask<File1> {
     private File1 tree;
     private File1 currentDir;
 
-    public RecursiveWalk(Path dir, int pathNameCount, int maxDepth, Filter filter, PrintWriter writer) {
+    public RecursiveCreateTree(Path dir, int pathNameCount, int maxDepth, Filter filter, PrintWriter writer) {
         this.dir = dir;
         this.pathNameCount = pathNameCount;
         this.maxDepth = maxDepth;
@@ -48,15 +32,15 @@ public class RecursiveWalk extends RecursiveTask<File1> {
 
     @Override
     protected File1 compute() {
-        final List<RecursiveWalk> walks = new ArrayList<>();
+        final List<RecursiveCreateTree> walks = new ArrayList<>();
         try {
             Files.walkFileTree(dir, EnumSet.allOf(FileVisitOption.class), Integer.MAX_VALUE, new SimpleFileVisitor<Path>() {
                 @Override
                 public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
                     //Create another instance for each folder in dir
-                    if (!dir.equals(RecursiveWalk.this.dir)) {
+                    if (!dir.equals(RecursiveCreateTree.this.dir)) {
                         // Look at the number of levels of the current dir
-                        RecursiveWalk w = new RecursiveWalk(dir, pathNameCount, maxDepth, filter, writer);
+                        RecursiveCreateTree w = new RecursiveCreateTree(dir, pathNameCount, maxDepth, filter, writer);
                         w.fork();
                         walks.add(w);
                         //System.out.println("SUBFOLDER  : " + dir + "\t" + Thread.currentThread());
@@ -154,7 +138,7 @@ public class RecursiveWalk extends RecursiveTask<File1> {
         }
 
         long somme = folderSize;
-        for (RecursiveWalk w : walks) {
+        for (RecursiveCreateTree w : walks) {
             //Loop through subfolders and adding them to the parent
             if (isBelowMaxDepth(w.dir)) {
                 if (filterIsActiveAndFolderIsNotEmptyOrfilterIsNotActive(w)) {
@@ -171,7 +155,7 @@ public class RecursiveWalk extends RecursiveTask<File1> {
         return tree;
     }
 
-    private boolean filterIsActiveAndFolderIsNotEmptyOrfilterIsNotActive(RecursiveWalk w) {
+    private boolean filterIsActiveAndFolderIsNotEmptyOrfilterIsNotActive(RecursiveCreateTree w) {
         return (w.join()).getWeight() != 0 && !filter.isEmpty() || filter.isEmpty();
     }
 

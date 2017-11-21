@@ -35,8 +35,11 @@ public class Test extends JFrame {
         //FileTree fileTree = FileTree.createFileTreeWithLimitedDepth(path2, filter, 2);
         fileTree.buildFileTree(1,2);
         //fileTree.collectDoublons(path2,2);
-        fileTree.collectDoublonsWithLimitedDepth(path2,2,2);
 
+        fileTree.collectDoublonsWithLimitedDepth(path2,1,2);
+        displayDuplicates(fileTree);
+        
+        fileTree.collectDoublonsWithLimitedDepth(path2,1,2);
         displayDuplicates(fileTree);
 
         //TEST OF HASH

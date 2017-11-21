@@ -1,25 +1,14 @@
 package acdc;
 
-import com.google.gson.*;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.channels.FileChannel;
-import java.nio.file.FileVisitOption;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.MutableTreeNode;
-import javax.swing.tree.TreeModel;
 
 public class FileTree {
 
@@ -55,7 +44,7 @@ public class FileTree {
 /*        PrintWriter writer = new PrintWriter("the-file-name.txt", "UTF-8");
         writer.println("The first line");*/
 
-        ForkAndJoinWalkFileTree(parallelism, maxDepth, null);
+        createTreeWithForkAndJoinWalkFileTree(parallelism, maxDepth, null);
 
 /*        PrintWriter writer = new PrintWriter("./cache.json", "UTF-8");
 
@@ -73,18 +62,19 @@ public class FileTree {
     }
 
     public void collectDoublons(String pathStr, int parallelism) throws IOException {
-        ForkAndJoinWalkFileTreeGetDoublons(pathStr,parallelism,Integer.MAX_VALUE,null);
+        collectDuplicatesWithForkAndJoinWalkFileTree(pathStr, parallelism, Integer.MAX_VALUE, null);
         //TODO: Clean doublons
     }
 
-    public void collectDoublonsWithLimitedDepth(String pathStr, int parallelism,int maxDepth) throws IOException {
-        ForkAndJoinWalkFileTreeGetDoublons(pathStr,parallelism,maxDepth,null);
+    public void collectDoublonsWithLimitedDepth(String pathStr, int parallelism, int maxDepth) throws IOException {
+        doublons.clear();
+        collectDuplicatesWithForkAndJoinWalkFileTree(pathStr, parallelism, maxDepth, null);
         //TODO: Clean doublons
     }
 
 
-    private void ForkAndJoinWalkFileTree(int parallelism, int maxDepth, PrintWriter writer) {
-        RecursiveWalk w = new RecursiveWalk(path, pathNameCount, maxDepth, filter, writer);
+    private void createTreeWithForkAndJoinWalkFileTree(int parallelism, int maxDepth, PrintWriter writer) {
+        RecursiveCreateTree w = new RecursiveCreateTree(path, pathNameCount, maxDepth, filter, writer);
         final ForkJoinPool pool = new ForkJoinPool(parallelism);
         try {
             this.root = pool.invoke(w);
@@ -93,7 +83,7 @@ public class FileTree {
         }
     }
 
-    private void ForkAndJoinWalkFileTreeGetDoublons(String pathStr, int parallelism, int maxDepth, PrintWriter writer) {
+    private void collectDuplicatesWithForkAndJoinWalkFileTree(String pathStr, int parallelism, int maxDepth, PrintWriter writer) {
         Path path = Paths.get(pathStr);
         RecursiveCollectDuplicates w = new RecursiveCollectDuplicates(path, pathNameCount, maxDepth, filter, writer);
         final ForkJoinPool pool = new ForkJoinPool(parallelism);
