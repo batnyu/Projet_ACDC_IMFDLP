@@ -23,6 +23,9 @@ public class Test extends JFrame {
         //String path2 = "C:\\Program Files (x86)";
 
         Filter filter = new Filter();
+        //filter.setPattern("app");
+        //filter.addRefusedFiles("taco.vtf");
+        //filter.addRefusedExtension("txt");
         //filter.addExtension("mkv");
         //filter.addExtension("txt");
         //filter.setName("Cdd");
@@ -36,10 +39,10 @@ public class Test extends JFrame {
         FileTree fileTree = new FileTree();
         TreeModel model = fileTree.tree(path2, filter,1);
         //TreeModel model2 = fileTree.tree(path2,filter,2);
-        ConcurrentHashMap<String, ConcurrentLinkedQueue<File>> duplicates =
-                fileTree.collectDuplicates(path2, filter,1);
 
-        
+        fileTree.collectDuplicates(path2, filter,1);
+        //fileTree.collectDuplicatesWithLimitedDepth(path2,filter,1,2);
+        ConcurrentHashMap<String, ConcurrentLinkedQueue<File>> duplicates = fileTree.getDoublons();
         displayDuplicates(duplicates);
 
 
@@ -57,7 +60,7 @@ public class Test extends JFrame {
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         this.setTitle("JTree Example");
         this.pack();
-        this.setVisible(true);
+
     }
 
     private void displayDuplicates(Map<String, ConcurrentLinkedQueue<File>> doublons) {
