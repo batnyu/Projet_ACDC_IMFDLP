@@ -31,26 +31,13 @@ public class Test extends JFrame {
 
         long startTime = System.currentTimeMillis();
 
-        FileTree fileTree = FileTree.createFileTree(path2, filter, false);
-        //FileTree fileTree = FileTree.createFileTreeWithLimitedDepth(path2, filter, false, 2);
-        fileTree.buildFileTree(1);
+        FileTree fileTree = FileTree.createFileTree(path2, filter);
+        //FileTree fileTree = FileTree.createFileTreeWithLimitedDepth(path2, filter, 2);
+        fileTree.buildFileTree(1,2);
+        //fileTree.collectDoublons(path2,2);
+        fileTree.collectDoublonsWithLimitedDepth(path2,1,2);
 
-        System.out.println("\n\n--- DOUBLONS ---\n");
-        Map<String, ConcurrentLinkedQueue<String>> doublons = fileTree.getDoublons();
-        int compteur=0;
-
-
-        for (Map.Entry<String, ConcurrentLinkedQueue<String>> entry : doublons.entrySet()) {
-            if(entry.getValue().size() > 1){
-                System.out.println("hash : " + entry.getKey());
-                for (String file : entry.getValue()) {
-                    System.out.println(file);
-                }
-                System.out.println("");
-                compteur++;
-            }
-        }
-        System.out.println("nb : " + compteur);
+        displayDuplicates(fileTree);
 
         //TEST OF HASH
 /*        try {
@@ -76,6 +63,25 @@ public class Test extends JFrame {
         this.setTitle("JTree Example");
         this.pack();
         this.setVisible(true);
+    }
+
+    private void displayDuplicates(FileTree fileTree) {
+        System.out.println("\n\n--- DOUBLONS ---\n");
+        Map<String, ConcurrentLinkedQueue<File>> doublons = fileTree.getDoublons();
+        int compteur=0;
+
+
+        for (Map.Entry<String, ConcurrentLinkedQueue<File>> entry : doublons.entrySet()) {
+            if(entry.getValue().size() > 1){
+                System.out.println("hash : " + entry.getKey());
+                for (File file : entry.getValue()) {
+                    System.out.println(file.getAbsolutePath());
+                }
+                System.out.println("");
+                compteur++;
+            }
+        }
+        System.out.println("nb : " + compteur);
     }
 
     public static void main(String[] args) throws IOException {

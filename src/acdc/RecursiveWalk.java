@@ -66,18 +66,19 @@ public class RecursiveWalk extends RecursiveTask<File1> {
                     } else {
                         //Creating the dir node
                         //System.out.println("FOLDER : " + dir + "\t" + Thread.currentThread());
+                        if (!doublonsFinder) {
+                            String simpleDir;
 
-                        String simpleDir;
+                            if (dir.getNameCount() == 0) {
+                                simpleDir = dir.getRoot().toString();
+                            } else {
+                                simpleDir = dir.getFileName().toString();
+                            }
 
-                        if (dir.getNameCount() == 0) {
-                            simpleDir = dir.getRoot().toString();
-                        } else {
-                            simpleDir = dir.getFileName().toString();
+                            //File1 newFolder = new File1(simpleDir, 0, "hash", dir.toString(), attrs.lastModifiedTime(), true);
+                            tree = new File1(simpleDir, 0, "hash", dir.toString(), attrs.lastModifiedTime(), true);
+                            currentDir = tree;
                         }
-
-                        //File1 newFolder = new File1(simpleDir, 0, "hash", dir.toString(), attrs.lastModifiedTime(), true);
-                        tree = new File1(simpleDir, 0, "hash", dir.toString(), attrs.lastModifiedTime(), true);
-                        currentDir = tree;
                         return FileVisitResult.CONTINUE;
                     }
                 }
@@ -91,13 +92,9 @@ public class RecursiveWalk extends RecursiveTask<File1> {
 
                         if (filter.accept(file)) {
                             if (isBelowMaxDepth(file)) {
-                                if (doublonsFinder) {
-                                    uniqueFileHash = collectDuplicates(file);
-                                }
-
                                 //TODO: ADD TO JSON FILE
 
-                                String pattern = Pattern.quote(System.getProperty("file.separator"));
+/*                                String pattern = Pattern.quote(System.getProperty("file.separator"));
                                 String[] levels = file.toString().split(pattern);
                                 System.out.println(file.toString());
 
@@ -106,8 +103,8 @@ public class RecursiveWalk extends RecursiveTask<File1> {
                                 int debut = rootPath.length;
                                 int machin = file.getNameCount() - file.getParent().getNameCount();
 
-                                CacheUpdate cacheUpdate = new CacheUpdate(rootPath,attrs.lastModifiedTime().toMillis());
-                                cacheUpdate.readJsonStream();
+                                CacheUpdate cacheUpdate = new CacheUpdate(rootPath, attrs.lastModifiedTime().toMillis());
+                                cacheUpdate.readJsonStream();*/
 
 /*                                String json = "cache.json";
                                 Configuration conf = Configuration.defaultConfiguration().addOptions(DEFAULT_PATH_LEAF_TO_NULL);
@@ -131,11 +128,18 @@ public class RecursiveWalk extends RecursiveTask<File1> {
 
                                 //$.children[?(@.filename == "19268_1333773742162_6130659_n - Copie.jpg")].lastModifiedTime.value
 
-                                //Adding all the files in the current DIR
-                                File1 newFile = new File1(file.getFileName().toString(), attrs.size(), uniqueFileHash, file.toString(), attrs.lastModifiedTime(), false);
-                                currentDir.add(newFile);
+
+                                if (!doublonsFinder) {
+                                    File1 newFile = new File1(file.getFileName().toString(), attrs.size(), uniqueFileHash, file.toString(), attrs.lastModifiedTime(), false);
+                                    currentDir.add(newFile);
+                                } else {
+                                    collectDuplicates(file,attrs.size());
+                                }
+
                             }
-                            folderSize += attrs.size();
+                            if (!doublonsFinder) {
+                                folderSize += attrs.size();
+                            }
                         }
                     }
                     return FileVisitResult.CONTINUE;
@@ -163,17 +167,24 @@ public class RecursiveWalk extends RecursiveTask<File1> {
         for (RecursiveWalk w : walks) {
             //Loop through subfolders and adding them to the parent
             if (isBelowMaxDepth(w.dir)) {
-                if (filterIsActiveAndFolderIsNotEmptyOrfilterIsNotActive(w))
-                    tree.add(w.join());
+                if (!doublonsFinder) {
+                    if (filterIsActiveAndFolderIsNotEmptyOrfilterIsNotActive(w)) {
+                        tree.add(w.join());
+                    }
+                } else {
+                    w.join();
             }
-            //Adding the size of the subfolders to join with the size of the files.
-            somme = somme + (w.join()).getWeight();
         }
-        //Setting the parent folder size.
-        tree.setWeight(somme);
+        //Adding the size of the subfolders to join with the size of the files.
+            if(!doublonsFinder)
+                somme = somme + (w.join()).getWeight();
+    }
+    //Setting the parent folder size.
+        if(!doublonsFinder)
+            tree.setWeight(somme);
 
         return tree;
-    }
+}
 
     private boolean filterIsActiveAndFolderIsNotEmptyOrfilterIsNotActive(RecursiveWalk w) {
         return (w.join()).getWeight() != 0 && !filter.isEmpty() || filter.isEmpty();
@@ -183,15 +194,16 @@ public class RecursiveWalk extends RecursiveTask<File1> {
         return file.getNameCount() - pathNameCount <= maxDepth;
     }
 
-    private String collectDuplicates(Path file) {
-        //TODO : Thread pour la collecte des doublons
+    private String collectDuplicates(Path file, long size) {
         String uniqueFileHash = null;
         try {
-
-            uniqueFileHash = Hash.sampleHashFile(file.toString());
+            //quick but errors can happen
+            uniqueFileHash = Hash.sampleHashFile(file.toString()) + size;
+            //very long but no error
+            //uniqueFileHash = Hash.md5OfFile(file.toFile());
 
             FileTree.doublons.computeIfAbsent(uniqueFileHash, k -> new ConcurrentLinkedQueue<>())
-                    .add(file.toAbsolutePath().toString());
+                    .add(file.toFile());
 
     /*      List<String> list = doublons.get(uniqueFileHash);
             if (list == null) {
@@ -200,6 +212,8 @@ public class RecursiveWalk extends RecursiveTask<File1> {
             }
             list.add(file.toAbsolutePath().toString());*/
         } catch (IOException | NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return uniqueFileHash;

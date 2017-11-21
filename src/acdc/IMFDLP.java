@@ -6,9 +6,8 @@ import java.util.Map;
 
 public interface IMFDLP {
 	TreeModel tree(String path, Filter filter);
-	TreeModel tree(String path, int depth);
+	TreeModel tree(String path, Filter filter, int depth);
 	Map<String,List<String>> doublons();
-	TreeModel treeModel();
 	String filename();
 	String hash();
 	long weight();

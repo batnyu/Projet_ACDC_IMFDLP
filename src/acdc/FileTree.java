@@ -2,6 +2,7 @@ package acdc;
 
 import com.google.gson.*;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.channels.FileChannel;
@@ -27,25 +28,23 @@ public class FileTree {
     private int pathNameCount;
     private Filter filter;
     private int maxDepth;
-    private boolean doublonsFinder;
 
-    public static ConcurrentHashMap<String, ConcurrentLinkedQueue<String>> doublons = new ConcurrentHashMap<>();
+    public static ConcurrentHashMap<String, ConcurrentLinkedQueue<File>> doublons = new ConcurrentHashMap<>();
     public static String rootPath = "";
 
-    private FileTree(String path, Filter filter, boolean doublonsFinder, int maxDepth) {
+    private FileTree(String path, Filter filter, int maxDepth) {
         this.path = Paths.get(path);
         rootPath = path;
         this.pathNameCount = this.path.getNameCount();
         this.filter = filter;
-        this.doublonsFinder = doublonsFinder;
         this.maxDepth = maxDepth;
     }
 
-    public ConcurrentHashMap<String, ConcurrentLinkedQueue<String>> getDoublons() {
+    public ConcurrentHashMap<String, ConcurrentLinkedQueue<File>> getDoublons() {
         return doublons;
     }
 
-    public void buildFileTree(int parallelism) throws IOException {
+    public void buildFileTree(int parallelism, int maxDepth) throws IOException {
 
 
 
@@ -56,7 +55,7 @@ public class FileTree {
 /*        PrintWriter writer = new PrintWriter("the-file-name.txt", "UTF-8");
         writer.println("The first line");*/
 
-        ForkAndJoinWalkFileTree(parallelism, null);
+        ForkAndJoinWalkFileTree(parallelism, maxDepth, null);
 
 /*        PrintWriter writer = new PrintWriter("./cache.json", "UTF-8");
 
@@ -70,14 +69,36 @@ public class FileTree {
 /*        if (!filter.isEmpty())
             this.deleteEmptyFolders();*/
 
+
+    }
+
+    public void collectDoublons(String pathStr, int parallelism) throws IOException {
+        ForkAndJoinWalkFileTreeGetDoublons(pathStr,parallelism,Integer.MAX_VALUE,null);
         //TODO: Clean doublons
     }
 
-    private void ForkAndJoinWalkFileTree(int parallelism, PrintWriter writer) {
-        RecursiveWalk w = new RecursiveWalk(path, pathNameCount, maxDepth, filter, doublonsFinder, writer);
+    public void collectDoublonsWithLimitedDepth(String pathStr, int parallelism,int maxDepth) throws IOException {
+        ForkAndJoinWalkFileTreeGetDoublons(pathStr,parallelism,maxDepth,null);
+        //TODO: Clean doublons
+    }
+
+
+    private void ForkAndJoinWalkFileTree(int parallelism, int maxDepth, PrintWriter writer) {
+        RecursiveWalk w = new RecursiveWalk(path, pathNameCount, maxDepth, filter, false, writer);
         final ForkJoinPool pool = new ForkJoinPool(parallelism);
         try {
             this.root = pool.invoke(w);
+        } finally {
+            pool.shutdown();
+        }
+    }
+
+    private void ForkAndJoinWalkFileTreeGetDoublons(String pathStr, int parallelism, int maxDepth, PrintWriter writer) {
+        Path path = Paths.get(pathStr);
+        RecursiveWalk w = new RecursiveWalk(path, pathNameCount, maxDepth, filter, true, writer);
+        final ForkJoinPool pool = new ForkJoinPool(parallelism);
+        try {
+            File1 root = pool.invoke(w);
         } finally {
             pool.shutdown();
         }
@@ -105,11 +126,11 @@ public class FileTree {
 
     //Fabriques statiques
 
-    public static FileTree createFileTree(String path, Filter filter, boolean doublonsFinder) {
-        return new FileTree(path, filter, doublonsFinder, Integer.MAX_VALUE);
+    public static FileTree createFileTree(String path, Filter filter) {
+        return new FileTree(path, filter, Integer.MAX_VALUE);
     }
 
-    public static FileTree createFileTreeWithLimitedDepth(String path, Filter filter, boolean doublonsFinder, int maxDepth) {
-        return new FileTree(path, filter, doublonsFinder, maxDepth);
+    public static FileTree createFileTreeWithLimitedDepth(String path, Filter filter, int maxDepth) {
+        return new FileTree(path, filter, maxDepth);
     }
 }

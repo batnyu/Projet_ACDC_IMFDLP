@@ -132,7 +132,7 @@ public class FileTreeCreator implements FileVisitor<Path> {
             uniqueFileHash = Hash.sampleHashFile(file.toString());
 
             FileTree.doublons.computeIfAbsent(uniqueFileHash, k -> new ConcurrentLinkedQueue<>())
-                         .add(file.toAbsolutePath().toString());
+                         .add(file.toFile());
 
     /*      List<String> list = doublons.get(uniqueFileHash);
             if (list == null) {
