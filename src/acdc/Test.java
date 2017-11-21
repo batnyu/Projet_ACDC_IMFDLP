@@ -38,7 +38,7 @@ public class Test extends JFrame {
 
         fileTree.collectDoublonsWithLimitedDepth(path2,1,2);
         displayDuplicates(fileTree);
-        
+
         fileTree.collectDoublonsWithLimitedDepth(path2,1,2);
         displayDuplicates(fileTree);
 
@@ -75,6 +75,7 @@ public class Test extends JFrame {
 
 
         for (Map.Entry<String, ConcurrentLinkedQueue<File>> entry : doublons.entrySet()) {
+            //Useless conditions if you clean duplicates.
             if(entry.getValue().size() > 1){
                 System.out.println("hash : " + entry.getKey());
                 for (File file : entry.getValue()) {

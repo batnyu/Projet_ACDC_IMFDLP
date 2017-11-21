@@ -63,13 +63,17 @@ public class FileTree {
 
     public void collectDoublons(String pathStr, int parallelism) throws IOException {
         collectDuplicatesWithForkAndJoinWalkFileTree(pathStr, parallelism, Integer.MAX_VALUE, null);
-        //TODO: Clean doublons
+        cleanDuplicates();
     }
 
     public void collectDoublonsWithLimitedDepth(String pathStr, int parallelism, int maxDepth) throws IOException {
         doublons.clear();
         collectDuplicatesWithForkAndJoinWalkFileTree(pathStr, parallelism, maxDepth, null);
-        //TODO: Clean doublons
+        cleanDuplicates();
+    }
+
+    private void cleanDuplicates() {
+        doublons.entrySet().removeIf(entry -> entry.getValue().size() == 1);
     }
 
 
