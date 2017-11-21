@@ -4,8 +4,7 @@ import javax.swing.tree.TreeModel;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -14,16 +13,31 @@ import java.util.concurrent.ForkJoinPool;
 public class FileTree implements IMFDLP {
 
     File1 root;
-    private Path path;
-    private int pathNameCount;
-    private Filter filter;
-    private int maxDepth;
 
+    /**
+     * ConcurrentHashmap with string as key and ConcurrentLinkedQueue<File> as values.
+     * Using of Concurrent classes because of several threads writing in this.
+     */
     public static ConcurrentHashMap<String, ConcurrentLinkedQueue<File>> duplicates = new ConcurrentHashMap<>();
+
+
     public static String rootPath = "";
 
-    public FileTree() {}
+    public FileTree() {
+    }
 
+    /**
+     * Building a tree structure with the Fork And Join Framework (Multi-threading)
+     * and WalkFileTree to walk the tree.
+     *
+     * @param path the root path of the tree.
+     * @param filter the filter you want to apply to the tree.
+     * @param parallelism the level of parallelism.
+     * @param pathNameCount number of levels of the path
+     * @param maxDepth to limit the depth of the tree.
+     * @param writer not implemented
+     * @return
+     */
     private File1 createTreeWithForkAndJoinWalkFileTree(Path path, Filter filter, int parallelism, int pathNameCount, int maxDepth, PrintWriter writer) {
         File1 root = null;
 
@@ -37,6 +51,15 @@ public class FileTree implements IMFDLP {
         }
     }
 
+    /**
+     * Collects duplicates files from the pathStr to the end of the tree
+     *
+     * @param pathStr the root path of the tree.
+     * @param filter the filter you want to apply to the tree.
+     * @param parallelism the level of parallelism.
+     * @return a ConcurrentHashmap with key string (hash) and Files as values
+     * @throws IOException
+     */
     public ConcurrentHashMap<String, ConcurrentLinkedQueue<File>> collectDuplicates(
             String pathStr, Filter filter, int parallelism) throws IOException {
         manageException(pathStr, filter);
@@ -46,6 +69,16 @@ public class FileTree implements IMFDLP {
         return duplicates;
     }
 
+    /**
+     * Collects duplicates files from the pathStr to the maximum depth
+     *
+     * @param pathStr the root path of the tree.
+     * @param filter the filter you want to apply to the tree.
+     * @param parallelism the level of parallelism.
+     * @param maxDepth the maximum depth from the root path
+     * @return a ConcurrentHashmap with key string (hash) and Files as values
+     * @throws IOException
+     */
     public ConcurrentHashMap<String, ConcurrentLinkedQueue<File>> collectDuplicatesWithLimitedDepth(
             String pathStr, Filter filter, int parallelism, int maxDepth) throws IOException {
         manageException(pathStr, filter);
@@ -55,14 +88,30 @@ public class FileTree implements IMFDLP {
         return duplicates;
     }
 
+    /**
+     * Throws some exception (fail-fast)
+     *
+     * @param pathStr the root path of the tree.
+     * @param filter the filter you want to apply to the tree.
+     */
     private void manageException(String pathStr, Filter filter) {
-        if(filter == null) {
+        if (filter == null) {
             throw new NullPointerException("Filtre null");
-        } else if(pathStr == null) {
+        } else if (pathStr == null) {
             throw new NullPointerException("Path null");
         }
     }
 
+    /**
+     * Collecting the duplicates with the Fork And Join Framework (Multi-threading)
+     * and WalkFileTree to walk the tree.
+     *
+     * @param pathStr the root path of the tree.
+     * @param filter the filter you want to apply to the tree.
+     * @param parallelism the level of parallelism.
+     * @param maxDepth to limit the depth of the tree.
+     * @param writer not implemented
+     */
     private void collectDuplicatesWithForkAndJoinWalkFileTree(String pathStr, Filter filter, int parallelism, int maxDepth, PrintWriter writer) {
         Path path = Paths.get(pathStr);
         int pathNameCount = path.getNameCount();
@@ -76,11 +125,20 @@ public class FileTree implements IMFDLP {
         }
     }
 
+    /**
+     * Clean entries in duplicates with only one value (No duplicate files)
+     */
     private void cleanDuplicates() {
         duplicates.entrySet().removeIf(entry -> entry.getValue().size() == 1);
     }
 
-
+    /**
+     * Used to get a tree from the pathStr to the end of the tree.
+     * @param pathStr the root path of the tree.
+     * @param filter the filter you want to apply to the tree.
+     * @param parallelism the level of parallelism.
+     * @return Treemodel for JTree.
+     */
     @Override
     public TreeModel tree(String pathStr, Filter filter, int parallelism) {
        /*        Path path = Paths.get("readfile.txt");
@@ -111,6 +169,14 @@ public class FileTree implements IMFDLP {
             this.deleteEmptyFolders();*/
     }
 
+    /**
+     * Used to get a tree from the pathStr to the depth specified.
+     * @param pathStr the root path of the tree.
+     * @param filter the filter you want to apply to the tree.
+     * @param parallelism the level of parallelism.
+     * @param depth to limit the depth of the tree.
+     * @return Treemodel for JTree.
+     */
     @Override
     public TreeModel tree(String pathStr, Filter filter, int parallelism, int depth) {
         Path path = Paths.get(pathStr);
@@ -121,7 +187,6 @@ public class FileTree implements IMFDLP {
     }
 
     /**
-     *
      * @return the hashmap containing the duplicate files
      */
     @Override
@@ -145,8 +210,25 @@ public class FileTree implements IMFDLP {
     }
 
     /**
+     * Used to delete a file from the file system.
+     * @param path of the file to delete
+     */
+    public void deleteFile(Path path) {
+        try {
+            Files.delete(path);
+        } catch (NoSuchFileException e) {
+            System.err.format("%s: no such file or directory%n", path);
+        } catch (DirectoryNotEmptyException e) {
+            System.err.format("%s not empty%n", path);
+        } catch (IOException e) {
+            //File permission problems are caught here.
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * This method removes the empty folders from the tree.
-     * Not used because, it's now done directly in RecursiveCreateTree
+     * Not used anymore because, it's now done directly in RecursiveCreateTree
      * by not adding the empty folders in the tree.
      */
     private void deleteEmptyFolders() {
