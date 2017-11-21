@@ -4,20 +4,22 @@ package acdc;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeModel;
 
 public class Test extends JFrame {
 
     public Test() throws IOException {
         //String path2 = "D:" + File.separator;
         //String path2 = "C:" + File.separator + "Users" + File.separator + "Baptiste" + File.separator + "Desktop" + File.separator + "test";
-        String path2 = "C:" + File.separator + "Users" + File.separator + "Baptiste" + File.separator + "Pictures";
+        //String path2 = "C:" + File.separator + "Users" + File.separator + "Baptiste" + File.separator + "Pictures";
         //String path2 = "C:" + File.separator + "Users" + File.separator + "Baptiste";
         //String path2 = "C:" + File.separator;
-        //String path2 = "C:\\Program Files (x86)\\Steam\\SteamApps";
+        String path2 = "C:\\Program Files (x86)\\Steam\\SteamApps";
         //String path2 = "C:\\Program Files (x86)";
 
         Filter filter = new Filter();
@@ -31,25 +33,15 @@ public class Test extends JFrame {
 
         long startTime = System.currentTimeMillis();
 
-        FileTree fileTree = FileTree.createFileTree(path2, filter);
-        //FileTree fileTree = FileTree.createFileTreeWithLimitedDepth(path2, filter, 2);
-        fileTree.buildFileTree(1,2);
-        //fileTree.collectDoublons(path2,2);
+        FileTree fileTree = new FileTree();
+        TreeModel model = fileTree.tree(path2, filter,1);
+        //TreeModel model2 = fileTree.tree(path2,filter,2);
+        ConcurrentHashMap<String, ConcurrentLinkedQueue<File>> duplicates =
+                fileTree.collectDuplicates(path2, filter,1);
 
-        fileTree.collectDoublonsWithLimitedDepth(path2,1,2);
-        displayDuplicates(fileTree);
+        
+        displayDuplicates(duplicates);
 
-        fileTree.collectDoublonsWithLimitedDepth(path2,1,2);
-        displayDuplicates(fileTree);
-
-        //TEST OF HASH
-/*        try {
-            //System.out.println(Hash.md5OfFile(new File1("D:\\Downloads T\\Fallout.New.Vegas.Ultimate.Edition-PROPHET\\ppt-fvue.iso")));
-
-            System.out.println(Hash.sampleHashFile("D:\\Downloads T\\Fallout.New.Vegas.Ultimate.Edition-PROPHET\\ppt-fvue.iso"));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }*/
 
         long stopTime = System.currentTimeMillis();
         long elapsedTime = stopTime - startTime;
@@ -57,10 +49,10 @@ public class Test extends JFrame {
         System.out.println((double)elapsedTime/1000/60 + " minutes");
 
 
-        JTree test = new JTree(new FileTreeModel(fileTree.root));
-        test.setCellRenderer(new FileTreeCellRenderer());
+        JTree jtree = new JTree(model);
+        jtree.setCellRenderer(new FileTreeCellRenderer());
 
-        JScrollPane treeView = new JScrollPane(test);
+        JScrollPane treeView = new JScrollPane(jtree);
         this.add(treeView);
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         this.setTitle("JTree Example");
@@ -68,14 +60,13 @@ public class Test extends JFrame {
         this.setVisible(true);
     }
 
-    private void displayDuplicates(FileTree fileTree) {
+    private void displayDuplicates(Map<String, ConcurrentLinkedQueue<File>> doublons) {
         System.out.println("\n\n--- DOUBLONS ---\n");
-        Map<String, ConcurrentLinkedQueue<File>> doublons = fileTree.getDoublons();
         int compteur=0;
 
 
         for (Map.Entry<String, ConcurrentLinkedQueue<File>> entry : doublons.entrySet()) {
-            //Useless conditions if you clean duplicates.
+            //Useless condition if you clean duplicates.
             if(entry.getValue().size() > 1){
                 System.out.println("hash : " + entry.getKey());
                 for (File file : entry.getValue()) {

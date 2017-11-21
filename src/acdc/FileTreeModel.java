@@ -13,19 +13,7 @@ public class FileTreeModel implements TreeModel {
     public FileTreeModel(File1 root) {
         rootFile = root;
     }
-
-    /**
-     * Used to toggle between show ancestors/show descendant and
-     * to change the root of the tree.
-     */
-    public void showAncestor(Object newRoot) {
-        File1 oldRoot = rootFile;
-        if (newRoot != null) {
-            rootFile = (File1)newRoot;
-        }
-        fireTreeStructureChanged(oldRoot);
-    }
-
+    
 ///////////////////// Fire events //////////////////////////////////////////////
 
     /**

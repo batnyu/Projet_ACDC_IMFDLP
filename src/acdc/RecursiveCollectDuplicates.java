@@ -10,7 +10,6 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.RecursiveAction;
-import java.util.concurrent.RecursiveTask;
 
 public class RecursiveCollectDuplicates extends RecursiveAction {
 
@@ -101,13 +100,13 @@ public class RecursiveCollectDuplicates extends RecursiveAction {
             //very long but no error
             //uniqueFileHash = Hash.md5OfFile(file.toFile());
 
-            FileTree.doublons.computeIfAbsent(uniqueFileHash, k -> new ConcurrentLinkedQueue<>())
+            FileTree.duplicates.computeIfAbsent(uniqueFileHash, k -> new ConcurrentLinkedQueue<>())
                     .add(file.toFile());
 
-    /*      List<String> list = doublons.get(uniqueFileHash);
+    /*      List<String> list = duplicates.get(uniqueFileHash);
             if (list == null) {
                 list = new LinkedList<>();
-                doublons.put(uniqueFileHash,list);
+                duplicates.put(uniqueFileHash,list);
             }
             list.add(file.toAbsolutePath().toString());*/
         } catch (IOException | NoSuchAlgorithmException e) {

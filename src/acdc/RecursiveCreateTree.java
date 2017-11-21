@@ -121,9 +121,6 @@ public class RecursiveCreateTree extends RecursiveTask<File1> {
 
                 @Override
                 public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-                    //USELESS
-                    //Setting the size of all the files in the folder
-                    //currentDir.setWeight(folderSize);
                     return FileVisitResult.CONTINUE;
                 }
 
@@ -141,7 +138,7 @@ public class RecursiveCreateTree extends RecursiveTask<File1> {
         for (RecursiveCreateTree w : walks) {
             //Loop through subfolders and adding them to the parent
             if (isBelowMaxDepth(w.dir)) {
-                if (filterIsActiveAndFolderIsNotEmptyOrfilterIsNotActive(w)) {
+                if (filterIsActiveAndFolderIsNotEmptyOrFilterIsNotActive(w)) {
                     tree.add(w.join());
                 }
             }
@@ -155,7 +152,7 @@ public class RecursiveCreateTree extends RecursiveTask<File1> {
         return tree;
     }
 
-    private boolean filterIsActiveAndFolderIsNotEmptyOrfilterIsNotActive(RecursiveCreateTree w) {
+    private boolean filterIsActiveAndFolderIsNotEmptyOrFilterIsNotActive(RecursiveCreateTree w) {
         return (w.join()).getWeight() != 0 && !filter.isEmpty() || filter.isEmpty();
     }
 

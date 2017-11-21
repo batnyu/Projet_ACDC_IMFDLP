@@ -125,19 +125,19 @@ public class FileTreeCreator implements FileVisitor<Path> {
 
 
     private String collectDuplicates(Path file) {
-        //TODO : Thread pour la collecte des doublons
+        //TODO : Thread pour la collecte des duplicates
         String uniqueFileHash = null;
         try {
 
             uniqueFileHash = Hash.sampleHashFile(file.toString());
 
-            FileTree.doublons.computeIfAbsent(uniqueFileHash, k -> new ConcurrentLinkedQueue<>())
+            FileTree.duplicates.computeIfAbsent(uniqueFileHash, k -> new ConcurrentLinkedQueue<>())
                          .add(file.toFile());
 
-    /*      List<String> list = doublons.get(uniqueFileHash);
+    /*      List<String> list = duplicates.get(uniqueFileHash);
             if (list == null) {
                 list = new LinkedList<>();
-                doublons.put(uniqueFileHash,list);
+                duplicates.put(uniqueFileHash,list);
             }
             list.add(file.toAbsolutePath().toString());*/
         } catch (IOException | NoSuchAlgorithmException e) {

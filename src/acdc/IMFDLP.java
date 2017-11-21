@@ -1,16 +1,27 @@
 package acdc;
 
 import javax.swing.tree.TreeModel;
-import java.util.List;
-import java.util.Map;
+import java.io.File;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public interface IMFDLP {
-	TreeModel tree(String path, Filter filter);
-	TreeModel tree(String path, Filter filter, int depth);
-	Map<String,List<String>> doublons();
+
+	TreeModel tree(String path, Filter filter, int parallelism);
+
+	TreeModel tree(String path, Filter filter, int parallelism, int depth);
+
+	//Concurrent because writing in HashMap from multiple threads
+	ConcurrentHashMap<String, ConcurrentLinkedQueue<File>> getDoublons();
+
 	String filename();
-	String hash();
+
+	//No hash for file, hash is independant of the building of the tree
+	//String hash();
+
 	long weight();
 	String absolutePath();
-	void filter(Filter[] filters);
+
+	//Filter passed via the constructor
+	//void filter(Filter[] filters);
 }
