@@ -18,7 +18,7 @@ public class FileTree implements IMFDLP {
      */
     public static ConcurrentHashMap<String, ConcurrentLinkedQueue<File>> duplicates = new ConcurrentHashMap<>();
 
-    public static String rootPath = "";
+    //public static String rootPath = "";
 
     public FileTree() {
     }
@@ -57,6 +57,7 @@ public class FileTree implements IMFDLP {
      * @return a ConcurrentHashmap with key string (hash) and Files as values
      * @throws IOException
      */
+    @Override
     public ConcurrentHashMap<String, ConcurrentLinkedQueue<File>> collectDuplicates(
             String pathStr, Filter filter, int parallelism) throws IOException {
         manageException(pathStr, filter);
@@ -76,6 +77,7 @@ public class FileTree implements IMFDLP {
      * @return a ConcurrentHashmap with key string (hash) and Files as values
      * @throws IOException
      */
+    @Override
     public ConcurrentHashMap<String, ConcurrentLinkedQueue<File>> collectDuplicatesWithLimitedDepth(
             String pathStr, Filter filter, int parallelism, int maxDepth) throws IOException {
         manageException(pathStr, filter);
@@ -86,15 +88,17 @@ public class FileTree implements IMFDLP {
     }
 
     /**
-     * Throws some exception (fail-fast)
+     * Throws some exception (fail-fast try)
      *
      * @param pathStr the root path of the tree.
      * @param filter the filter you want to apply to the tree.
      */
     private void manageException(String pathStr, Filter filter) {
         if (filter == null) {
+            ErrorLogging.getInstance().addLog("Filtre null");
             throw new NullPointerException("Filtre null");
         } else if (pathStr == null) {
+            ErrorLogging.getInstance().addLog("Path null");
             throw new NullPointerException("Path null");
         }
     }
@@ -179,14 +183,15 @@ public class FileTree implements IMFDLP {
         Path path = Paths.get(pathStr);
         int pathNameCount = path.getNameCount();
 
-        return (TreeModel) createTreeWithForkAndJoinWalkFileTree(
+        File1 root = createTreeWithForkAndJoinWalkFileTree(
                 path, filter, parallelism, pathNameCount, depth, null);
+        TreeModel model = new FileTreeModel(root);
+        return model;
     }
 
     /**
-     * @return the hashmap containing the duplicate files
+     * @return the hashmap containing the current duplicate files
      */
-    @Override
     public ConcurrentHashMap<String, ConcurrentLinkedQueue<File>> getDoublons() {
         return duplicates;
     }

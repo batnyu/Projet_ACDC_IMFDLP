@@ -43,7 +43,7 @@ public class Test extends JFrame {
 
         FileTree fileTree = new FileTree();
         TreeModel model = fileTree.tree(path2, filter,1);
-        //TreeModel model2 = fileTree.tree(path2,filter,2);
+        //TreeModel model = fileTree.tree(path2,filter,2,2);
 
 /*        long stopTime = System.currentTimeMillis();
         long elapsedTime = stopTime - startTime;
@@ -80,9 +80,9 @@ public class Test extends JFrame {
         this.setBounds(0, 0, 600, 600);
         this.setVisible(true);
 
-        fileTree.collectDuplicates(path2, filter,1);
-        //fileTree.collectDuplicatesWithLimitedDepth(path2,filter,1,2);
-        ConcurrentHashMap<String, ConcurrentLinkedQueue<File>> duplicates = fileTree.getDoublons();
+        ConcurrentHashMap<String, ConcurrentLinkedQueue<File>> duplicates = fileTree.collectDuplicates(path2, filter,1);
+        //ConcurrentHashMap<String, ConcurrentLinkedQueue<File>> duplicates = fileTree.collectDuplicatesWithLimitedDepth(path2,filter,1,2);
+
         displayDuplicates(duplicates);
 
         //Récupération des erreurs
