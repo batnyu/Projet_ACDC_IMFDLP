@@ -18,17 +18,15 @@ public class File1 {
 
     public String filename;
     public long weight;
-    public String hash;
     public String absolutePath;
     public boolean isDirectory;
     public FileTime lastModifiedTime;
 
     Vector<File1> children;
 
-    public File1(String filename, long weight, String hash, String absolutePath, FileTime lastModifiedTime, boolean isDirectory) {
+    public File1(String filename, long weight, String absolutePath, FileTime lastModifiedTime, boolean isDirectory) {
         this.filename = filename;
         this.weight = weight;
-        this.hash = hash;
         this.absolutePath = absolutePath;
         this.lastModifiedTime = lastModifiedTime;
         this.isDirectory = isDirectory;
@@ -42,10 +40,6 @@ public class File1 {
 
     public long getWeight() {
         return weight;
-    }
-
-    public String getHash() {
-        return hash;
     }
 
     public String getAbsolutePath() {
@@ -67,10 +61,6 @@ public class File1 {
 
     public void setWeight(long weight) {
         this.weight = weight;
-    }
-
-    public void setHash(String hash) {
-        this.hash = hash;
     }
 
     public void setAbsolutePath(String absolutePath) {

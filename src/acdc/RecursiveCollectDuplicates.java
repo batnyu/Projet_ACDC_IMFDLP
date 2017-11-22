@@ -1,15 +1,15 @@
 package acdc;
 
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.RecursiveAction;
+
+import static acdc.FileTree.duplicates;
 
 public class RecursiveCollectDuplicates extends RecursiveAction {
 
@@ -52,11 +52,25 @@ public class RecursiveCollectDuplicates extends RecursiveAction {
                     if (attrs.isRegularFile()) {
                         //System.out.println(Thread.currentThread() + "\t" + file);
 
-                        String uniqueFileHash = "hash";
+                        Path fileCache = Paths.get("cache.txt");
 
                         if (filter.accept(file)) {
                             if (isBelowMaxDepth(file)) {
-                                collectDuplicates(file,attrs.size());
+
+                                //Recherche dans cache duplicates
+                                try {
+                                    Files.createFile(fileCache);
+                                } catch (FileAlreadyExistsException ignored) {
+                                }
+
+                                //Search for the file in cache
+                                String cachedStr = searchUsingBufferedReader(
+                                        fileCache.toString(),
+                                        file.toString() + "!!!" +
+                                                attrs.size() + "!!!" +
+                                                attrs.lastModifiedTime().toMillis());
+
+                                collectDuplicates(file, attrs.size(), cachedStr, attrs.lastModifiedTime(), fileCache);
                             }
 
                         }
@@ -93,29 +107,79 @@ public class RecursiveCollectDuplicates extends RecursiveAction {
         return file.getNameCount() - pathNameCount <= maxDepth;
     }
 
-    private String collectDuplicates(Path file, long size) {
+    private String collectDuplicates(Path file, long size, String cachedStr, FileTime fileTime, Path fileCache) {
         String uniqueFileHash = null;
         try {
-            //quick but errors can happen
-            uniqueFileHash = Hash.sampleHashFile(file.toString()) + size;
-            //very long but no error
-            //uniqueFileHash = Hash.md5OfFile(file.toFile());
+            //If the file is not cached
+            if (cachedStr == null) {
+                //quick but errors can happen
+                uniqueFileHash = Hash.sampleHashFile(file.toString()) + size;
+                //very long but no error
+                //uniqueFileHash = Hash.md5OfFile(file.toFile());
 
-            FileTree.duplicates.computeIfAbsent(uniqueFileHash, k -> new ConcurrentLinkedQueue<>())
+                //Write to file if not find
+                try (BufferedWriter writer = Files.newBufferedWriter(fileCache, StandardOpenOption.APPEND)) {
+                    writer.write(
+                            file.toString() + "!!!" +
+                                    size + "!!!" +
+                                    fileTime.toMillis() + "!!!" +
+                                    uniqueFileHash + "!!!" +
+                                    System.lineSeparator());
+                } catch (IOException ioe) {
+                    System.err.format("IOException: %s%n", ioe);
+                }
+
+            } else {
+                String[] splitted = cachedStr.split("!!!");
+                uniqueFileHash = splitted[3];
+            }
+
+            duplicates.computeIfAbsent(uniqueFileHash, k -> new ConcurrentLinkedQueue<>())
                     .add(file.toFile());
 
-    /*      List<String> list = duplicates.get(uniqueFileHash);
+            //Other way to write it.
+/*            ConcurrentLinkedQueue<File> list = duplicates.get(uniqueFileHash);
             if (list == null) {
-                list = new LinkedList<>();
-                duplicates.put(uniqueFileHash,list);
+                System.out.println("hash not there");
+                list = new ConcurrentLinkedQueue<>();
+                duplicates.put(uniqueFileHash, list);
             }
-            list.add(file.toAbsolutePath().toString());*/
+            list.add(file.toFile());*/
+
+
         } catch (IOException | NoSuchAlgorithmException e) {
             e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         }
         return uniqueFileHash;
+    }
+
+    public String searchUsingBufferedReader(String filePath, String searchQuery) throws IOException {
+        searchQuery = searchQuery.trim();
+        BufferedReader br = null;
+
+        try {
+            br = new BufferedReader(new InputStreamReader(new FileInputStream(filePath)));
+            String line;
+            while ((line = br.readLine()) != null) {
+                //System.out.println("line = " + line);
+                //System.out.println("searchQuery = " + searchQuery);
+                if (line.contains(searchQuery)) {
+                    return line;
+                } else {
+                }
+            }
+        } finally {
+            try {
+                if (br != null)
+                    br.close();
+            } catch (Exception e) {
+                System.err.println("Exception while closing bufferedreader " + e.toString());
+            }
+        }
+
+        return null;
     }
 }
 

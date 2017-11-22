@@ -19,9 +19,9 @@ import javax.swing.tree.TreePath;
 public class Test extends JFrame {
 
     public Test() throws IOException {
-        String path2 = "D:" + File.separator;
+        //String path2 = "D:" + File.separator;
         //String path2 = "C:" + File.separator + "Users" + File.separator + "Baptiste" + File.separator + "Desktop" + File.separator + "test";
-        //String path2 = "C:" + File.separator + "Users" + File.separator + "Baptiste" + File.separator + "Pictures";
+        String path2 = "C:" + File.separator + "Users" + File.separator + "Baptiste" + File.separator + "Pictures";
         //String path2 = "C:" + File.separator + "Users" + File.separator + "Baptiste";
         //String path2 = "C:" + File.separator;
         //String path2 = "C:\\Program Files (x86)\\Steam\\SteamApps";
@@ -45,10 +45,13 @@ public class Test extends JFrame {
         TreeModel model = fileTree.tree(path2, filter,1);
         //TreeModel model2 = fileTree.tree(path2,filter,2);
 
-        long stopTime = System.currentTimeMillis();
+/*        long stopTime = System.currentTimeMillis();
         long elapsedTime = stopTime - startTime;
         System.out.println("elapsedTime : " + elapsedTime + " ms");
-        System.out.println((double)elapsedTime/1000/60 + " minutes");
+        System.out.println((double)elapsedTime/1000/60 + " minutes");*/
+
+        //Exemple récupération de la racine
+        //System.out.println("rootPath = " + ((File1) model.getRoot()).getAbsolutePath());
 
         JTree tree = new JTree(model);
         tree.setCellRenderer(new FileTreeCellRenderer());
@@ -88,6 +91,11 @@ public class Test extends JFrame {
         for (String log: errorLogs) {
             System.out.println(log);
         }
+
+        long stopTime = System.currentTimeMillis();
+        long elapsedTime = stopTime - startTime;
+        System.out.println("elapsedTime : " + elapsedTime + " ms");
+        System.out.println((double)elapsedTime/1000/60 + " minutes");
 
     }
 

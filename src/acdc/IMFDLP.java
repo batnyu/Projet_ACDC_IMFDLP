@@ -14,13 +14,16 @@ public interface IMFDLP {
 	//Concurrent because writing in HashMap from multiple threads
 	ConcurrentHashMap<String, ConcurrentLinkedQueue<File>> getDoublons();
 
-	String filename();
+	//Useless
+	//String filename();
 
 	//No hash for file, hash is independant of the building of the tree
 	//String hash();
 
-	long weight();
-	String absolutePath();
+	//Useless
+	//long weight();
+	//Useless
+	//String absolutePath();
 
 	//Filter passed via the constructor
 	//void filter(Filter[] filters);

@@ -12,14 +12,11 @@ import java.util.concurrent.ForkJoinPool;
 
 public class FileTree implements IMFDLP {
 
-    File1 root;
-
     /**
      * ConcurrentHashmap with string as key and ConcurrentLinkedQueue<File> as values.
      * Using of Concurrent classes because of several threads writing in this.
      */
     public static ConcurrentHashMap<String, ConcurrentLinkedQueue<File>> duplicates = new ConcurrentHashMap<>();
-
 
     public static String rootPath = "";
 
@@ -194,20 +191,6 @@ public class FileTree implements IMFDLP {
         return duplicates;
     }
 
-    @Override
-    public String filename() {
-        return this.root.getFilename();
-    }
-
-    @Override
-    public long weight() {
-        return this.root.getWeight();
-    }
-
-    @Override
-    public String absolutePath() {
-        return this.root.getAbsolutePath();
-    }
 
     /**
      * Used to delete a file from the file system.
@@ -231,8 +214,8 @@ public class FileTree implements IMFDLP {
      * Not used anymore because, it's now done directly in RecursiveCreateTree
      * by not adding the empty folders in the tree.
      */
-    private void deleteEmptyFolders() {
-        Enumeration<File1> en = this.root.breadthFirstEnumeration();
+    private void deleteEmptyFolders(File1 root) {
+        Enumeration<File1> en = root.breadthFirstEnumeration();
 
         while (en.hasMoreElements()) {
             File1 node = en.nextElement();
@@ -245,7 +228,7 @@ public class FileTree implements IMFDLP {
                 node.removeFromParent();
                 //Modifying the tree by removing a node invalidates any enumerations created before the modification
                 //so we create a new update one.
-                en = this.root.breadthFirstEnumeration();
+                en = root.breadthFirstEnumeration();
             }
 
         }

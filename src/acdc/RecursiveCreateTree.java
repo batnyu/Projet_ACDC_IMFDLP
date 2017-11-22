@@ -57,7 +57,7 @@ public class RecursiveCreateTree extends RecursiveTask<File1> {
                         }
 
                         //File1 newFolder = new File1(simpleDir, 0, "hash", dir.toString(), attrs.lastModifiedTime(), true);
-                        tree = new File1(simpleDir, 0, "hash", dir.toString(), attrs.lastModifiedTime(), true);
+                        tree = new File1(simpleDir, 0, dir.toString(), attrs.lastModifiedTime(), true);
                         currentDir = tree;
 
                         return FileVisitResult.CONTINUE;
@@ -109,7 +109,7 @@ public class RecursiveCreateTree extends RecursiveTask<File1> {
 
                                 //$.children[?(@.filename == "19268_1333773742162_6130659_n - Copie.jpg")].lastModifiedTime.value
 
-                                File1 newFile = new File1(file.getFileName().toString(), attrs.size(), uniqueFileHash, file.toString(), attrs.lastModifiedTime(), false);
+                                File1 newFile = new File1(file.getFileName().toString(), attrs.size(), file.toString(), attrs.lastModifiedTime(), false);
                                 currentDir.add(newFile);
 
                             }

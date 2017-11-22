@@ -8,6 +8,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
+
+
 public class CacheUpdate {
 
     static String[] path = {"Pictures", "79gVnGo.jpg"};
@@ -110,7 +112,7 @@ public class CacheUpdate {
                 currentValue = reader.nextString();
                 System.out.println(currentValue);
                 if (currentValue.equals(path[path.length - 1])) {
-                    System.out.println("ALLOOOOOOOOOOO");
+                    System.out.println("ALLOOOOO");
                     this.setFound(true);
                     return;
                 }
