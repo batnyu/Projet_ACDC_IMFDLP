@@ -35,7 +35,7 @@ public interface IMFDLP {
 	 * @param filter the filter you want to apply to the tree.
 	 * @param parallelism the level of parallelism.
 	 * @return a ConcurrentHashmap with key string (hash) and Files as values
-	 * @throws IOException
+	 * @throws IOException when access to file
 	 */
 	ConcurrentHashMap<String, ConcurrentLinkedQueue<File>> collectDuplicates(
 			String pathStr, Filter filter, int parallelism) throws IOException;
@@ -53,16 +53,4 @@ public interface IMFDLP {
 	 */
 	ConcurrentHashMap<String, ConcurrentLinkedQueue<File>> collectDuplicatesWithLimitedDepth(
 			String pathStr, Filter filter, int parallelism, int maxDepth) throws IOException;
-
-	//Useless
-	//String filename();
-
-	//No hash for file, hash is independant of the building of the tree
-	//String hash();
-
-	//Useless
-	//long weight();
-	//Useless
-	//String absolutePath();
-
 }

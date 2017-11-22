@@ -6,14 +6,41 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
-import java.nio.file.Path;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+/**
+ * <b>Hash is a class with 2 different way of hashing with the MD5 algorithm.</b>
+ * <ul>
+ *   <li>sampleHashFile</li>
+ *   <p>
+ *       This hash has a constant complexity.
+ *       It takes samples at the beginning, in the middle and at the end and hash it.
+ *       It's quick but can output some errors.
+ *   </p>
+ *   <li>md5ofFile</li>
+ *   <p>
+ *       This hash complexity depends on the file size.
+ *       It hashes all the file.
+ *       It's very slow but can't output errors.
+ *   </p>
+ * </ul>
+ *
+ * @author Baptiste
+ * @version 1.0
+ */
 public class Hash {
     private static final int SAMPLE_SIZE = 4000;
 
+    /**
+     * Hashing only three samples of the file
+     *
+     * @param path the path of the file to hash.
+     * @return the hash of the file as a string.
+     * @throws IOException when the file is protected for example
+     * @throws NoSuchAlgorithmException when the algo is not available in the environnment
+     */
     public static String sampleHashFile(String path) throws IOException, NoSuchAlgorithmException {
 
         final long totalBytes = new java.io.File(path).length();
@@ -40,6 +67,12 @@ public class Hash {
         }
     }
 
+    /**
+     *
+     * @param file the path of the file to hash.
+     * @return the hash of the file as a string.
+     * @throws Exception when the algo is not available in the environment.
+     */
     public static String md5OfFile(File file) throws Exception{
         MessageDigest md = MessageDigest.getInstance("MD5");
         FileInputStream fs = new FileInputStream(file);

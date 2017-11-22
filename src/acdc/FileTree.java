@@ -20,7 +20,15 @@ public class FileTree implements IMFDLP {
 
     //public static String rootPath = "";
 
-    public FileTree() {
+    private FileTree() {
+    }
+
+    /**
+     * Static fabric to instantiate the FileTree class.
+     * @return a FileTree.
+     */
+    public static FileTree creerFileTree(){
+        return new FileTree();
     }
 
     /**
@@ -33,10 +41,10 @@ public class FileTree implements IMFDLP {
      * @param pathNameCount number of levels of the path
      * @param maxDepth to limit the depth of the tree.
      * @param writer not implemented
-     * @return
+     * @return a structure representing the tree (File1)
      */
     private File1 createTreeWithForkAndJoinWalkFileTree(Path path, Filter filter, int parallelism, int pathNameCount, int maxDepth, PrintWriter writer) {
-        File1 root = null;
+        File1 root;
 
         RecursiveCreateTree w = new RecursiveCreateTree(path, pathNameCount, maxDepth, filter, writer);
         final ForkJoinPool pool = new ForkJoinPool(parallelism);
@@ -44,8 +52,8 @@ public class FileTree implements IMFDLP {
             root = pool.invoke(w);
         } finally {
             pool.shutdown();
-            return root;
         }
+        return root;
     }
 
     /**
@@ -55,14 +63,14 @@ public class FileTree implements IMFDLP {
      * @param filter the filter you want to apply to the tree.
      * @param parallelism the level of parallelism.
      * @return a ConcurrentHashmap with key string (hash) and Files as values
-     * @throws IOException
+     * @throws IOException when access to protected file for example
      */
     @Override
     public ConcurrentHashMap<String, ConcurrentLinkedQueue<File>> collectDuplicates(
             String pathStr, Filter filter, int parallelism) throws IOException {
         manageException(pathStr, filter);
         duplicates.clear();
-        collectDuplicatesWithForkAndJoinWalkFileTree(pathStr, filter, parallelism, Integer.MAX_VALUE, null);
+        collectDuplicatesWithForkAndJoinWalkFileTree(pathStr, filter, parallelism, Integer.MAX_VALUE);
         cleanDuplicates();
         return duplicates;
     }
@@ -75,16 +83,45 @@ public class FileTree implements IMFDLP {
      * @param parallelism the level of parallelism.
      * @param maxDepth the maximum depth from the root path
      * @return a ConcurrentHashmap with key string (hash) and Files as values
-     * @throws IOException
+     * @throws IOException when access to protected file for example
      */
     @Override
     public ConcurrentHashMap<String, ConcurrentLinkedQueue<File>> collectDuplicatesWithLimitedDepth(
             String pathStr, Filter filter, int parallelism, int maxDepth) throws IOException {
         manageException(pathStr, filter);
         duplicates.clear();
-        collectDuplicatesWithForkAndJoinWalkFileTree(pathStr, filter, parallelism, maxDepth, null);
+        collectDuplicatesWithForkAndJoinWalkFileTree(pathStr, filter, parallelism, maxDepth);
         cleanDuplicates();
         return duplicates;
+    }
+
+    /**
+     * Collecting the duplicates with the Fork And Join Framework (Multi-threading)
+     * and WalkFileTree to walk the tree.
+     *
+     * @param pathStr the root path of the tree.
+     * @param filter the filter you want to apply to the tree.
+     * @param parallelism the level of parallelism.
+     * @param maxDepth to limit the depth of the tree.
+     */
+    private void collectDuplicatesWithForkAndJoinWalkFileTree(String pathStr, Filter filter, int parallelism, int maxDepth) {
+        Path path = Paths.get(pathStr);
+        int pathNameCount = path.getNameCount();
+
+        RecursiveCollectDuplicates w = new RecursiveCollectDuplicates(path, pathNameCount, maxDepth, filter);
+        final ForkJoinPool pool = new ForkJoinPool(parallelism);
+        try {
+            pool.invoke(w);
+        } finally {
+            pool.shutdown();
+        }
+    }
+
+    /**
+     * Clean entries in duplicates with only one value (No duplicate files)
+     */
+    private void cleanDuplicates() {
+        duplicates.entrySet().removeIf(entry -> entry.getValue().size() == 1);
     }
 
     /**
@@ -101,36 +138,6 @@ public class FileTree implements IMFDLP {
             ErrorLogging.getInstance().addLog("Path null");
             throw new NullPointerException("Path null");
         }
-    }
-
-    /**
-     * Collecting the duplicates with the Fork And Join Framework (Multi-threading)
-     * and WalkFileTree to walk the tree.
-     *
-     * @param pathStr the root path of the tree.
-     * @param filter the filter you want to apply to the tree.
-     * @param parallelism the level of parallelism.
-     * @param maxDepth to limit the depth of the tree.
-     * @param writer not implemented
-     */
-    private void collectDuplicatesWithForkAndJoinWalkFileTree(String pathStr, Filter filter, int parallelism, int maxDepth, PrintWriter writer) {
-        Path path = Paths.get(pathStr);
-        int pathNameCount = path.getNameCount();
-
-        RecursiveCollectDuplicates w = new RecursiveCollectDuplicates(path, pathNameCount, maxDepth, filter, writer);
-        final ForkJoinPool pool = new ForkJoinPool(parallelism);
-        try {
-            pool.invoke(w);
-        } finally {
-            pool.shutdown();
-        }
-    }
-
-    /**
-     * Clean entries in duplicates with only one value (No duplicate files)
-     */
-    private void cleanDuplicates() {
-        duplicates.entrySet().removeIf(entry -> entry.getValue().size() == 1);
     }
 
     /**
@@ -154,8 +161,7 @@ public class FileTree implements IMFDLP {
 
         File1 root = createTreeWithForkAndJoinWalkFileTree(
                 path, filter, parallelism, pathNameCount, Integer.MAX_VALUE, null);
-        TreeModel model = new FileTreeModel(root);
-        return model;
+        return new FileTreeModel(root);
 
 /*        PrintWriter writer = new PrintWriter("./cache.json", "UTF-8");
 
@@ -185,8 +191,7 @@ public class FileTree implements IMFDLP {
 
         File1 root = createTreeWithForkAndJoinWalkFileTree(
                 path, filter, parallelism, pathNameCount, depth, null);
-        TreeModel model = new FileTreeModel(root);
-        return model;
+        return new FileTreeModel(root);
     }
 
     /**
@@ -196,6 +201,29 @@ public class FileTree implements IMFDLP {
         return duplicates;
     }
 
+    /**
+     * Displaying the duplicate files
+     *
+     * @param duplicates to display
+     */
+    public void displayDuplicates(Map<String, ConcurrentLinkedQueue<File>> duplicates) {
+        System.out.println("\n\n--- DOUBLONS ---\n");
+
+        int compteur=0;
+
+        for (Map.Entry<String, ConcurrentLinkedQueue<File>> entry : duplicates.entrySet()) {
+            //Useless condition if you clean duplicates with the cleanDuplicates method of FileTree class.
+            if(entry.getValue().size() > 1){
+                System.out.println("hash : " + entry.getKey());
+                for (File file : entry.getValue()) {
+                    System.out.println(file.getAbsolutePath());
+                }
+                System.out.println("");
+                compteur++;
+            }
+        }
+        System.out.println("nb : " + compteur);
+    }
 
     /**
      * Used to delete a file from the file system.

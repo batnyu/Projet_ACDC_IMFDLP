@@ -19,9 +19,9 @@ import javax.swing.tree.TreePath;
 public class Test extends JFrame {
 
     public Test() throws IOException {
-        //String path2 = "D:" + File.separator;
+        String path2 = "D:" + File.separator;
         //String path2 = "C:" + File.separator + "Users" + File.separator + "Baptiste" + File.separator + "Desktop" + File.separator + "test";
-        String path2 = "C:" + File.separator + "Users" + File.separator + "Baptiste" + File.separator + "Pictures";
+        //String path2 = "C:" + File.separator + "Users" + File.separator + "Baptiste" + File.separator + "Pictures";
         //String path2 = "C:" + File.separator + "Users" + File.separator + "Baptiste";
         //String path2 = "C:" + File.separator;
         //String path2 = "C:\\Program Files (x86)\\Steam\\SteamApps";
@@ -41,7 +41,7 @@ public class Test extends JFrame {
 
         long startTime = System.currentTimeMillis();
 
-        FileTree fileTree = new FileTree();
+        FileTree fileTree = FileTree.creerFileTree();
         TreeModel model = fileTree.tree(path2, filter,1);
         //TreeModel model = fileTree.tree(path2,filter,2,2);
 
@@ -75,7 +75,7 @@ public class Test extends JFrame {
         JScrollPane treeView = new JScrollPane(tree);
         this.add(treeView);
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        this.setTitle("JTree Example");
+        this.setTitle("Il me faut de la place !");
         this.pack();
         this.setBounds(0, 0, 600, 600);
         this.setVisible(true);
@@ -83,7 +83,7 @@ public class Test extends JFrame {
         ConcurrentHashMap<String, ConcurrentLinkedQueue<File>> duplicates = fileTree.collectDuplicates(path2, filter,1);
         //ConcurrentHashMap<String, ConcurrentLinkedQueue<File>> duplicates = fileTree.collectDuplicatesWithLimitedDepth(path2,filter,1,2);
 
-        displayDuplicates(duplicates);
+        fileTree.displayDuplicates(duplicates);
 
         //Récupération des erreurs
         System.out.println("Erreurs : ");
@@ -97,25 +97,6 @@ public class Test extends JFrame {
         System.out.println("elapsedTime : " + elapsedTime + " ms");
         System.out.println((double)elapsedTime/1000/60 + " minutes");
 
-    }
-
-    private void displayDuplicates(Map<String, ConcurrentLinkedQueue<File>> doublons) {
-        System.out.println("\n\n--- DOUBLONS ---\n");
-        int compteur=0;
-
-
-        for (Map.Entry<String, ConcurrentLinkedQueue<File>> entry : doublons.entrySet()) {
-            //Useless condition if you clean duplicates with the cleanDuplicates method of FileTree class.
-            if(entry.getValue().size() > 1){
-                System.out.println("hash : " + entry.getKey());
-                for (File file : entry.getValue()) {
-                    System.out.println(file.getAbsolutePath());
-                }
-                System.out.println("");
-                compteur++;
-            }
-        }
-        System.out.println("nb : " + compteur);
     }
 
     public static void main(String[] args) throws IOException {

@@ -11,21 +11,46 @@ import java.util.concurrent.RecursiveAction;
 
 import static acdc.FileTree.duplicates;
 
+/**
+ * <b>RecursiveCollectDuplicates is the class allowing you to collect the duplicates.</b>
+ * <p>
+ * It uses the Fork/Join Framework to split the work.
+ * It extends from RecursiveAction that return nothing.
+ * Since I just add hash to the static duplicates field in FileTree class, I don't need to return anything.
+ * For each folder, a class is instantiated.
+ * You can choose the level of parallelism you want (how many worker threads to use).
+ * </p>
+ * <p>
+ * To walk the file system tree, it uses WalkFileTree from Files.
+ * When an IOException occurs, it adds the error message in the ErrorLogging class.
+ * </p>
+ * <p>
+ * When Files.walkFileTree visit files, it uses the filter to collect only the duplicates of
+ * the matching files.
+ * </p>
+ * <p>
+ * Since it's in multithread with multiple instance of WalkFileTree,
+ * the maxDepth coming with WalkFileTree doesn't work.
+ * So, I use the pathNameCount of the current dir and I compare it to the original path requested.
+ * With this, I join the folders and add the files only if the current depth is smaller than the max depth.
+ * </p>
+ *
+ * @author Baptiste
+ * @version 1.0
+ */
 public class RecursiveCollectDuplicates extends RecursiveAction {
 
     private Filter filter;
-    private PrintWriter writer;
 
     private final Path dir;
     private int pathNameCount;
     private int maxDepth;
 
-    public RecursiveCollectDuplicates(Path dir, int pathNameCount, int maxDepth, Filter filter, PrintWriter writer) {
+    public RecursiveCollectDuplicates(Path dir, int pathNameCount, int maxDepth, Filter filter) {
         this.dir = dir;
         this.pathNameCount = pathNameCount;
         this.maxDepth = maxDepth;
         this.filter = filter;
-        this.writer = writer;
     }
 
     @Override
@@ -37,10 +62,12 @@ public class RecursiveCollectDuplicates extends RecursiveAction {
                 public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
                     //Create another instance for each folder in dir
                     if (!dir.equals(RecursiveCollectDuplicates.this.dir)) {
-                        // Look at the number of levels of the current dir
-                        RecursiveCollectDuplicates w = new RecursiveCollectDuplicates(dir, pathNameCount, maxDepth, filter, writer);
-                        w.fork();
-                        walks.add(w);
+                        if (isBelowMaxDepth(dir)) {
+                            // Look at the number of levels of the current dir
+                            RecursiveCollectDuplicates w = new RecursiveCollectDuplicates(dir, pathNameCount, maxDepth, filter);
+                            w.fork();
+                            walks.add(w);
+                        }
                         return FileVisitResult.SKIP_SUBTREE;
                     } else {
                         return FileVisitResult.CONTINUE;
@@ -54,9 +81,8 @@ public class RecursiveCollectDuplicates extends RecursiveAction {
 
                         Path fileCache = Paths.get("cache.txt");
 
-                        if (filter.accept(file)) {
-                            if (isBelowMaxDepth(file)) {
-
+                        if (isBelowMaxDepth(file)) {
+                            if (filter.accept(file)) {
                                 //Recherche dans cache duplicates
                                 try {
                                     Files.createFile(fileCache);
@@ -103,16 +129,32 @@ public class RecursiveCollectDuplicates extends RecursiveAction {
         }
     }
 
+    /**
+     * Used to limit the depth of the search.
+     *
+     * @param file the path of the file.
+     * @return true if the current depth is smaller than the max depth.
+     */
     private boolean isBelowMaxDepth(Path file) {
         return file.getNameCount() - pathNameCount <= maxDepth;
     }
 
-    private String collectDuplicates(Path file, long size, String cachedStr, FileTime fileTime, Path fileCache) {
-        String uniqueFileHash = null;
+    /**
+     * Hashing the file if not already in the cache or getting back the hash from the file
+     * and adding it to the static HashMap of the FileTree class.
+     *
+     * @param file the path of the current file
+     * @param size the size of the current file
+     * @param cachedStr the result of the search in the cache
+     * @param fileTime the last modified time of the current file.
+     * @param fileCache the path towards the cache file.
+     */
+    private void collectDuplicates(Path file, long size, String cachedStr, FileTime fileTime, Path fileCache) {
+        String uniqueFileHash;
         try {
             //If the file is not cached
             if (cachedStr == null) {
-                //quick but errors can happen
+                //quick but errors can happen (constant complexity)
                 uniqueFileHash = Hash.sampleHashFile(file.toString()) + size;
                 //very long but no error
                 //uniqueFileHash = Hash.md5OfFile(file.toFile());
@@ -152,9 +194,16 @@ public class RecursiveCollectDuplicates extends RecursiveAction {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return uniqueFileHash;
     }
 
+    /**
+     * Search for a string in a file and return the string.
+     *
+     * @param filePath the path of the file to search
+     * @param searchQuery the string to search.
+     * @return null if not found or the string found.
+     * @throws IOException
+     */
     public String searchUsingBufferedReader(String filePath, String searchQuery) throws IOException {
         searchQuery = searchQuery.trim();
         BufferedReader br = null;
