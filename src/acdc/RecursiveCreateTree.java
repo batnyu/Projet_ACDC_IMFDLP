@@ -126,7 +126,8 @@ public class RecursiveCreateTree extends RecursiveTask<File1> {
 
                 @Override
                 public FileVisitResult visitFileFailed(Path file, IOException exc) {
-                    exc.printStackTrace();
+                    ErrorLogging.getInstance().addLog(exc.toString());
+                    //exc.printStackTrace();
                     return FileVisitResult.CONTINUE;
                 }
             });
