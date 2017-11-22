@@ -1,9 +1,24 @@
-package acdc;
+package acdc.TreeDataModel;
 
 import java.beans.Transient;
 import java.nio.file.attribute.FileTime;
 import java.util.*;
 
+/**
+ * <b>File1 is the class representing the data model of the tree</b>
+ * <p>
+ * <p>
+ * I choose to implement my own data model and not DefaultMutableTreeNode
+ * when I try to build a json cache. It was more easier than with a DefaultMutableTreeNode.
+ * <p>
+ * <p>
+ * I copied the Services offered by DefaultMutableTreeNode in this class
+ * to provide the basic actions and
+ * the different Enumerations for iterating through the tree (depth first, width first...)
+ *
+ * @author Baptiste
+ * @version 1.0
+ */
 public class File1 {
 
     /**
@@ -12,7 +27,9 @@ public class File1 {
      */
     static public final Enumeration<File1> EMPTY_ENUMERATION = Collections.emptyEnumeration();
 
-    /** this node's parent, or null if this node has no parent */
+    /**
+     * this node's parent, or null if this node has no parent
+     */
     //transient to avoid parent being cached.
     protected transient File1 parent;
 
@@ -942,7 +959,6 @@ public class File1 {
      * method in conjunction with <code>getAllowsChildren</code>
      *
      * @return true if this node has no children
-     *
      */
     public boolean isLeaf() {
         return (getChildCount() == 0);
@@ -1116,7 +1132,7 @@ public class File1 {
 
         return newNode;
     }
-    
+
     private final class PreorderEnumeration implements Enumeration<File1> {
         private final Stack<Enumeration> stack = new Stack<Enumeration>();
 

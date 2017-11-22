@@ -1,4 +1,8 @@
-package acdc;
+package acdc.Core;
+
+import acdc.Core.Utils.Filter;
+import acdc.Services.ErrorLogging;
+import acdc.TreeDataModel.File1;
 
 import java.io.*;
 import java.nio.file.*;
@@ -7,35 +11,35 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.RecursiveTask;
+import java.util.regex.Pattern;
 
 /**
  * <b>RecursiveCreateTree is the class allowing you to get a tree.</b>
  * <p>
- *     It uses the Fork/Join Framework to split the work.
- *     It extends from RecursiveTask that allow to return a result.
- *     I use it to return the buil
- *     For each folder, a class is instantiated.
- *     You can choose the level of parallelism you want (how many worker threads to use).
- * </p>
+ * It uses the Fork/Join Framework to split the work.
+ * It extends from RecursiveTask that allows to return a result.
+ * I use it to return the build tree.
+ * For each folder, a class is instantiated.
+ * You can choose the level of parallelism you want (how many worker threads to use).
  * <p>
- *     To walk the file system tree, it uses WalkFileTree from Files.
- *     When an IOException occurs, it adds the error message in the ErrorLogging class.
- * </p>
  * <p>
- *     When Files.walkFileTree visit files, it uses the filter to add only
- *     the matching files.
- * </p>
+ * To walk the file system tree, it uses WalkFileTree from Files.
+ * When an IOException occurs, it adds the error message in the ErrorLogging class.
  * <p>
- *     During Files.walkFileTree, it adds the file size and adds it to the parent folder recursively.
- * </p>
  * <p>
- *     Since it's in multithread with multiple instance of WalkFileTree,
- *     the maxDepth coming with WalkFileTree doesn't work.
- *     So, I use the pathNameCount of the current dir and I compare it to the original path requested.
- *     With this, I join the folders and add the files only if the current depth is smaller than the max depth.
- *     But I continue creating instances of RecursiveCreateTree in preVisitDirectory() in order to get
- *     the size of the folders of the tree.
- * </p>
+ * When Files.walkFileTree visit files, it uses the filter to add only
+ * the matching files.
+ * <p>
+ * <p>
+ * During Files.walkFileTree, it adds the file size and adds it to the parent folder recursively.
+ * <p>
+ * <p>
+ * Since it's in multithread with multiple instance of WalkFileTree,
+ * the maxDepth coming with WalkFileTree doesn't work.
+ * So, I use the pathNameCount of the current dir and I compare it to the original path requested.
+ * With this, I join the folders and add the files only if the current depth is smaller than the max depth.
+ * But I continue creating instances of RecursiveCreateTree in preVisitDirectory() in order to get
+ * the size of the folders of the tree even when I passed the maxDepth.
  *
  * @author Baptiste
  * @version 1.0
@@ -43,7 +47,6 @@ import java.util.concurrent.RecursiveTask;
 public class RecursiveCreateTree extends RecursiveTask<File1> {
 
     private Filter filter;
-    private PrintWriter writer;
 
     private final Path dir;
     private int pathNameCount;
@@ -53,12 +56,11 @@ public class RecursiveCreateTree extends RecursiveTask<File1> {
     private File1 tree;
     private File1 currentDir;
 
-    public RecursiveCreateTree(Path dir, int pathNameCount, int maxDepth, Filter filter, PrintWriter writer) {
+    public RecursiveCreateTree(Path dir, int pathNameCount, int maxDepth, Filter filter) {
         this.dir = dir;
         this.pathNameCount = pathNameCount;
         this.maxDepth = maxDepth;
         this.filter = filter;
-        this.writer = writer;
     }
 
     @Override
@@ -71,7 +73,7 @@ public class RecursiveCreateTree extends RecursiveTask<File1> {
                     //Create another instance for each folder in dir
                     if (!dir.equals(RecursiveCreateTree.this.dir)) {
                         // Look at the number of levels of the current dir
-                        RecursiveCreateTree w = new RecursiveCreateTree(dir, pathNameCount, maxDepth, filter, writer);
+                        RecursiveCreateTree w = new RecursiveCreateTree(dir, pathNameCount, maxDepth, filter);
                         w.fork();
                         walks.add(w);
                         //System.out.println("SUBFOLDER  : " + dir + "\t" + Thread.currentThread());
@@ -112,12 +114,8 @@ public class RecursiveCreateTree extends RecursiveTask<File1> {
                                 String[] levels = file.toString().split(pattern);
                                 System.out.println(file.toString());
 
-                                System.out.println("rootpath = " + FileTree.rootPath);
-                                String[] rootPath = FileTree.rootPath.split(pattern);
-                                int debut = rootPath.length;
-                                int machin = file.getNameCount() - file.getParent().getNameCount();
-
-                                CacheUpdate cacheUpdate = new CacheUpdate(rootPath, attrs.lastModifiedTime().toMillis());
+                                //I managed to read the json cache but didn't have enough time to implement writing.
+                                CacheUpdate cacheUpdate = new CacheUpdate(levels, attrs.lastModifiedTime().toMillis());
                                 cacheUpdate.readJsonStream();*/
 
                                 File1 newFile = new File1(file.getFileName().toString(), attrs.size(), file.toString(), attrs.lastModifiedTime(), false);

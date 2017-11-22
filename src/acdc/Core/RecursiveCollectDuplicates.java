@@ -1,4 +1,9 @@
-package acdc;
+package acdc.Core;
+
+import acdc.Core.Utils.Filter;
+import acdc.Core.Utils.Hash;
+import acdc.Services.ErrorLogging;
+import acdc.Services.Settings;
 
 import java.io.*;
 import java.nio.file.*;
@@ -9,7 +14,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.RecursiveAction;
 
-import static acdc.FileTree.duplicates;
+import static acdc.Core.FileTree.duplicates;
 
 /**
  * <b>RecursiveCollectDuplicates is the class allowing you to collect the duplicates.</b>
@@ -19,21 +24,25 @@ import static acdc.FileTree.duplicates;
  * Since I just add hash to the static duplicates field in FileTree class, I don't need to return anything.
  * For each folder, a class is instantiated.
  * You can choose the level of parallelism you want (how many worker threads to use).
- * </p>
+ * <p>
  * <p>
  * To walk the file system tree, it uses WalkFileTree from Files.
  * When an IOException occurs, it adds the error message in the ErrorLogging class.
- * </p>
+ * <p>
  * <p>
  * When Files.walkFileTree visit files, it uses the filter to collect only the duplicates of
  * the matching files.
- * </p>
+ * <p>
  * <p>
  * Since it's in multithread with multiple instance of WalkFileTree,
  * the maxDepth coming with WalkFileTree doesn't work.
  * So, I use the pathNameCount of the current dir and I compare it to the original path requested.
  * With this, I join the folders and add the files only if the current depth is smaller than the max depth.
- * </p>
+ * <p>
+ * <p>
+ * This class uses a cache file for the hashes. When listing the file tree, it checks for each file
+ * if a hash was already built in the cache. If not, it hashes the file, If yes, it gets the hash from the cache.
+ * Then it adds the hash in the Hashmap.
  *
  * @author Baptiste
  * @version 1.0
@@ -79,7 +88,7 @@ public class RecursiveCollectDuplicates extends RecursiveAction {
                     if (attrs.isRegularFile()) {
                         //System.out.println(Thread.currentThread() + "\t" + file);
 
-                        Path fileCache = Paths.get("cache.txt");
+                        Path fileCache = Paths.get(Settings.getInstance().getPathCacheHash());
 
                         if (isBelowMaxDepth(file)) {
                             if (filter.accept(file)) {
@@ -143,10 +152,10 @@ public class RecursiveCollectDuplicates extends RecursiveAction {
      * Hashing the file if not already in the cache or getting back the hash from the file
      * and adding it to the static HashMap of the FileTree class.
      *
-     * @param file the path of the current file
-     * @param size the size of the current file
+     * @param file      the path of the current file
+     * @param size      the size of the current file
      * @param cachedStr the result of the search in the cache
-     * @param fileTime the last modified time of the current file.
+     * @param fileTime  the last modified time of the current file.
      * @param fileCache the path towards the cache file.
      */
     private void collectDuplicates(Path file, long size, String cachedStr, FileTime fileTime, Path fileCache) {
@@ -199,7 +208,7 @@ public class RecursiveCollectDuplicates extends RecursiveAction {
     /**
      * Search for a string in a file and return the string.
      *
-     * @param filePath the path of the file to search
+     * @param filePath    the path of the file to search
      * @param searchQuery the string to search.
      * @return null if not found or the string found.
      * @throws IOException

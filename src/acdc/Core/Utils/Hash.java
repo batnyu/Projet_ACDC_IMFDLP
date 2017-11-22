@@ -1,4 +1,4 @@
-package acdc;
+package acdc.Core.Utils;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -12,19 +12,20 @@ import java.security.NoSuchAlgorithmException;
 
 /**
  * <b>Hash is a class with 2 different way of hashing with the MD5 algorithm.</b>
+ * <p>
  * <ul>
- *   <li>sampleHashFile</li>
- *   <p>
- *       This hash has a constant complexity.
- *       It takes samples at the beginning, in the middle and at the end and hash it.
- *       It's quick but can output some errors.
- *   </p>
- *   <li>md5ofFile</li>
- *   <p>
- *       This hash complexity depends on the file size.
- *       It hashes all the file.
- *       It's very slow but can't output errors.
- *   </p>
+ * <li>sampleHashFile</li>
+ * <p>
+ * This hash has a constant complexity.
+ * It takes samples at the beginning, in the middle and at the end and hash it.
+ * It's quick but can output some errors.
+ * <p>
+ * <li>md5ofFile</li>
+ * <p>
+ * This hash complexity depends on the file size.
+ * It hashes all the file.
+ * It's very slow but can't output errors.
+ * <p>
  * </ul>
  *
  * @author Baptiste
@@ -38,7 +39,7 @@ public class Hash {
      *
      * @param path the path of the file to hash.
      * @return the hash of the file as a string.
-     * @throws IOException when the file is protected for example
+     * @throws IOException              when the file is protected for example
      * @throws NoSuchAlgorithmException when the algo is not available in the environnment
      */
     public static String sampleHashFile(String path) throws IOException, NoSuchAlgorithmException {
@@ -68,25 +69,24 @@ public class Hash {
     }
 
     /**
-     *
      * @param file the path of the file to hash.
      * @return the hash of the file as a string.
      * @throws Exception when the algo is not available in the environment.
      */
-    public static String md5OfFile(File file) throws Exception{
+    public static String md5OfFile(File file) throws Exception {
         MessageDigest md = MessageDigest.getInstance("MD5");
         FileInputStream fs = new FileInputStream(file);
         BufferedInputStream bs = new BufferedInputStream(fs);
         byte[] buffer = new byte[1024];
         int bytesRead;
 
-        while((bytesRead = bs.read(buffer, 0, buffer.length)) != -1){
+        while ((bytesRead = bs.read(buffer, 0, buffer.length)) != -1) {
             md.update(buffer, 0, bytesRead);
         }
         byte[] digest = md.digest();
 
         StringBuilder sb = new StringBuilder();
-        for(byte bite : digest){
+        for (byte bite : digest) {
             sb.append(String.format("%02x", bite & 0xff));
         }
         return sb.toString();

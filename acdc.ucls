@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <class-diagram version="1.2.1" icons="true" always-add-relationships="false" generalizations="true" realizations="true" 
   associations="true" dependencies="false" nesting-relationships="true" router="FAN">  
-  <interface id="1" language="java" name="acdc.IMFDLP" project="Projet_ACDC_IMFDLP"
+  <interface id="1" language="java" name="acdc.Core.IMFDLP" project="Projet_ACDC_IMFDLP"
     file="/Projet_ACDC_IMFDLP/src/acdc/INode.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="903" y="199"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
@@ -28,7 +28,7 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="4" language="java" name="acdc.File1" project="Projet_ACDC_IMFDLP" 
+  <class id="4" language="java" name="acdc.TreeDataModel.File1" project="Projet_ACDC_IMFDLP"
     file="/Projet_ACDC_IMFDLP/src/acdc/File1.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="291" y="463"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 

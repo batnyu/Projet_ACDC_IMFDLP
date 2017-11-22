@@ -1,4 +1,4 @@
-package acdc;
+package acdc.TreeDataModel;
 
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
@@ -6,6 +6,20 @@ import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 import java.util.Vector;
 
+/**
+ * <b>FileTreeModel is a custom implementation of TreeModel</b>
+ * <p>
+ * <p>
+ * It is useful to create my own data structure that is represented by the File1 class.
+ * I did this to be able to cache my structure without difficulties with gson.toJsonTree().
+ * But I didn't manage to update and add to this cache. I just had the time to implement the read of it.
+ * He could be very useful to use this technique since you can use gson.fromJsonTree()
+ * to get the tree structure back and put it in a JTree without listing your file system each time.
+ * But it require hooks on the file system to be relevant.
+ *
+ * @author Baptiste
+ * @version 1.0
+ */
 public class FileTreeModel implements TreeModel {
     private Vector<TreeModelListener> treeModelListeners = new Vector<TreeModelListener>();
     private File1 rootFile;
@@ -13,7 +27,7 @@ public class FileTreeModel implements TreeModel {
     public FileTreeModel(File1 root) {
         rootFile = root;
     }
-    
+
 ///////////////////// Fire events //////////////////////////////////////////////
 
     /**

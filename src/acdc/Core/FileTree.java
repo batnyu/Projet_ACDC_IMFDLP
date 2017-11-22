@@ -1,15 +1,29 @@
-package acdc;
+package acdc.Core;
+
+import acdc.Core.Utils.Filter;
+import acdc.Services.ErrorLogging;
+import acdc.TreeDataModel.File1;
+import acdc.TreeDataModel.FileTreeModel;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import javax.swing.tree.TreeModel;
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ForkJoinPool;
 
+/**
+ * <b>FileTree is the implementation of IMFDLP</b>
+ * <p>
+ * <p>
+ * It's the Core of the application with all the features.
+ *
+ * @author Baptiste
+ * @version 1.0
+ */
 public class FileTree implements IMFDLP {
 
     /**
@@ -18,16 +32,17 @@ public class FileTree implements IMFDLP {
      */
     public static ConcurrentHashMap<String, ConcurrentLinkedQueue<File>> duplicates = new ConcurrentHashMap<>();
 
-    //public static String rootPath = "";
+    public static String rootPath = "";
 
     private FileTree() {
     }
 
     /**
      * Static fabric to instantiate the FileTree class.
+     *
      * @return a FileTree.
      */
-    public static FileTree creerFileTree(){
+    public static FileTree creerFileTree() {
         return new FileTree();
     }
 
@@ -35,18 +50,17 @@ public class FileTree implements IMFDLP {
      * Building a tree structure with the Fork And Join Framework (Multi-threading)
      * and WalkFileTree to walk the tree.
      *
-     * @param path the root path of the tree.
-     * @param filter the filter you want to apply to the tree.
-     * @param parallelism the level of parallelism.
+     * @param path          the root path of the tree.
+     * @param filter        the filter you want to apply to the tree.
+     * @param parallelism   the level of parallelism.
      * @param pathNameCount number of levels of the path
-     * @param maxDepth to limit the depth of the tree.
-     * @param writer not implemented
+     * @param maxDepth      to limit the depth of the tree.
      * @return a structure representing the tree (File1)
      */
-    private File1 createTreeWithForkAndJoinWalkFileTree(Path path, Filter filter, int parallelism, int pathNameCount, int maxDepth, PrintWriter writer) {
+    private File1 createTreeWithForkAndJoinWalkFileTree(Path path, Filter filter, int parallelism, int pathNameCount, int maxDepth) {
         File1 root;
 
-        RecursiveCreateTree w = new RecursiveCreateTree(path, pathNameCount, maxDepth, filter, writer);
+        RecursiveCreateTree w = new RecursiveCreateTree(path, pathNameCount, maxDepth, filter);
         final ForkJoinPool pool = new ForkJoinPool(parallelism);
         try {
             root = pool.invoke(w);
@@ -59,8 +73,8 @@ public class FileTree implements IMFDLP {
     /**
      * Collects duplicates files from the pathStr to the end of the tree
      *
-     * @param pathStr the root path of the tree.
-     * @param filter the filter you want to apply to the tree.
+     * @param pathStr     the root path of the tree.
+     * @param filter      the filter you want to apply to the tree.
      * @param parallelism the level of parallelism.
      * @return a ConcurrentHashmap with key string (hash) and Files as values
      * @throws IOException when access to protected file for example
@@ -78,10 +92,10 @@ public class FileTree implements IMFDLP {
     /**
      * Collects duplicates files from the pathStr to the maximum depth
      *
-     * @param pathStr the root path of the tree.
-     * @param filter the filter you want to apply to the tree.
+     * @param pathStr     the root path of the tree.
+     * @param filter      the filter you want to apply to the tree.
      * @param parallelism the level of parallelism.
-     * @param maxDepth the maximum depth from the root path
+     * @param maxDepth    the maximum depth from the root path
      * @return a ConcurrentHashmap with key string (hash) and Files as values
      * @throws IOException when access to protected file for example
      */
@@ -99,10 +113,10 @@ public class FileTree implements IMFDLP {
      * Collecting the duplicates with the Fork And Join Framework (Multi-threading)
      * and WalkFileTree to walk the tree.
      *
-     * @param pathStr the root path of the tree.
-     * @param filter the filter you want to apply to the tree.
+     * @param pathStr     the root path of the tree.
+     * @param filter      the filter you want to apply to the tree.
      * @param parallelism the level of parallelism.
-     * @param maxDepth to limit the depth of the tree.
+     * @param maxDepth    to limit the depth of the tree.
      */
     private void collectDuplicatesWithForkAndJoinWalkFileTree(String pathStr, Filter filter, int parallelism, int maxDepth) {
         Path path = Paths.get(pathStr);
@@ -128,7 +142,7 @@ public class FileTree implements IMFDLP {
      * Throws some exception (fail-fast try)
      *
      * @param pathStr the root path of the tree.
-     * @param filter the filter you want to apply to the tree.
+     * @param filter  the filter you want to apply to the tree.
      */
     private void manageException(String pathStr, Filter filter) {
         if (filter == null) {
@@ -142,46 +156,51 @@ public class FileTree implements IMFDLP {
 
     /**
      * Used to get a tree from the pathStr to the end of the tree.
-     * @param pathStr the root path of the tree.
-     * @param filter the filter you want to apply to the tree.
+     *
+     * @param pathStr     the root path of the tree.
+     * @param filter      the filter you want to apply to the tree.
      * @param parallelism the level of parallelism.
      * @return Treemodel for JTree.
      */
     @Override
     public TreeModel tree(String pathStr, Filter filter, int parallelism) {
-       /*        Path path = Paths.get("readfile.txt");
-        Files.createFile(path);
-        FileChannel fileChannel = FileChannel.open(path);*/
-
-/*        PrintWriter writer = new PrintWriter("the-file-name.txt", "UTF-8");
-        writer.println("The first line");*/
 
         Path path = Paths.get(pathStr);
         int pathNameCount = path.getNameCount();
 
         File1 root = createTreeWithForkAndJoinWalkFileTree(
-                path, filter, parallelism, pathNameCount, Integer.MAX_VALUE, null);
-        return new FileTreeModel(root);
+                path, filter, parallelism, pathNameCount, Integer.MAX_VALUE);
 
-/*        PrintWriter writer = new PrintWriter("./cache.json", "UTF-8");
+        //These commented lines build a json cache of all the tree.
+        // I didn't have the time to implement the update of this cache.
+/*        PrintWriter writer = null;
+        try {
+            writer = new PrintWriter("cacheTree.json", "UTF-8");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        JsonElement jsonElement = gson.toJsonTree(this.root);
+        //JsonElement jsonElement = gson.toJsonTree(root);
+        String treeJson = gson.toJson(root);
 
-        writer.append(jsonElement.toString());
+        System.out.println(treeJson);
+        writer.append(treeJson);
         writer.close();*/
 
-        //Deleting empty folder when a filter is on
-/*        if (!filter.isEmpty())
-            this.deleteEmptyFolders();*/
+        return new FileTreeModel(root);
+
     }
 
     /**
      * Used to get a tree from the pathStr to the depth specified.
-     * @param pathStr the root path of the tree.
-     * @param filter the filter you want to apply to the tree.
+     *
+     * @param pathStr     the root path of the tree.
+     * @param filter      the filter you want to apply to the tree.
      * @param parallelism the level of parallelism.
-     * @param depth to limit the depth of the tree.
+     * @param depth       to limit the depth of the tree.
      * @return Treemodel for JTree.
      */
     @Override
@@ -190,7 +209,7 @@ public class FileTree implements IMFDLP {
         int pathNameCount = path.getNameCount();
 
         File1 root = createTreeWithForkAndJoinWalkFileTree(
-                path, filter, parallelism, pathNameCount, depth, null);
+                path, filter, parallelism, pathNameCount, depth);
         return new FileTreeModel(root);
     }
 
@@ -209,11 +228,11 @@ public class FileTree implements IMFDLP {
     public void displayDuplicates(Map<String, ConcurrentLinkedQueue<File>> duplicates) {
         System.out.println("\n\n--- DOUBLONS ---\n");
 
-        int compteur=0;
+        int compteur = 0;
 
         for (Map.Entry<String, ConcurrentLinkedQueue<File>> entry : duplicates.entrySet()) {
             //Useless condition if you clean duplicates with the cleanDuplicates method of FileTree class.
-            if(entry.getValue().size() > 1){
+            if (entry.getValue().size() > 1) {
                 System.out.println("hash : " + entry.getKey());
                 for (File file : entry.getValue()) {
                     System.out.println(file.getAbsolutePath());
@@ -227,6 +246,7 @@ public class FileTree implements IMFDLP {
 
     /**
      * Used to delete a file from the file system.
+     *
      * @param path of the file to delete
      */
     public void deleteFile(Path path) {
@@ -253,7 +273,6 @@ public class FileTree implements IMFDLP {
         while (en.hasMoreElements()) {
             File1 node = en.nextElement();
             System.out.println(node.absolutePath + " " + node.weight);
-            //System.out.println("machin : " + ((File1) node.getUserObject()).filename + " " + ((File1) node.getUserObject()).weight);
             //Avoiding loop if node is empty
             if (node.weight == 0 && !node.isRoot()) {
                 System.out.println(node.absolutePath);

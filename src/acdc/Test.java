@@ -1,5 +1,10 @@
 package acdc;
 
+import acdc.Core.FileTree;
+import acdc.Core.Utils.Filter;
+import acdc.Services.ErrorLogging;
+import acdc.Services.Settings;
+import acdc.TreeDataModel.FileTreeCellRenderer;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -7,65 +12,57 @@ import java.awt.event.MouseListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import javax.swing.*;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
 public class Test extends JFrame {
 
     public Test() throws IOException {
-        String path2 = "D:" + File.separator;
-        //String path2 = "C:" + File.separator + "Users" + File.separator + "Baptiste" + File.separator + "Desktop" + File.separator + "test";
-        //String path2 = "C:" + File.separator + "Users" + File.separator + "Baptiste" + File.separator + "Pictures";
-        //String path2 = "C:" + File.separator + "Users" + File.separator + "Baptiste";
-        //String path2 = "C:" + File.separator;
-        //String path2 = "C:\\Program Files (x86)\\Steam\\SteamApps";
-        //String path2 = "C:\\Program Files (x86)";
+        long startTime = System.currentTimeMillis();
 
-        Filter filter = new Filter();
-        //filter.setPattern("app");
-        //filter.addRefusedFiles("taco.vtf");
-        //filter.addRefusedExtension("txt");
+        //String path2 = "C:" + File.separator;
+        String path2 = "D:" + File.separator;
+
+///////// Set the path of the cacheHash.txt file /////////
+        Settings.getInstance().setPathCacheHash("cacheHash.txt");
+
+///////// FILTER CREATION /////////
+        Filter filter = Filter.createFilter();
+        //filter.setPattern("mkv");
+        //filter.addRefusedFiles("msdia80.dll");
+        //filter.addRefusedExtension("mkv");
         //filter.addExtension("mkv");
         //filter.addExtension("txt");
-        //filter.setName("Cdd");
+        //filter.setName("msdia80.dll");
         //filter.setLastModifiedTime("14/05/2013");
         //filter.equalsWeight(61735));
         //filter.LwWeight(36423);
         //filter.GtWeight(61735);
 
-        long startTime = System.currentTimeMillis();
-
+///////// GETTING A TREE /////////
         FileTree fileTree = FileTree.creerFileTree();
-        TreeModel model = fileTree.tree(path2, filter,1);
+        TreeModel model = fileTree.tree(path2, filter, 1);
         //TreeModel model = fileTree.tree(path2,filter,2,2);
 
-/*        long stopTime = System.currentTimeMillis();
-        long elapsedTime = stopTime - startTime;
-        System.out.println("elapsedTime : " + elapsedTime + " ms");
-        System.out.println((double)elapsedTime/1000/60 + " minutes");*/
-
-        //Exemple récupération de la racine
+        //Example of getting the root of the tree
         //System.out.println("rootPath = " + ((File1) model.getRoot()).getAbsolutePath());
 
         JTree tree = new JTree(model);
         tree.setCellRenderer(new FileTreeCellRenderer());
 
+///////// Preparing the event listener to right clic on node to collect duplicates from there /////////
         MouseListener ml = new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
                 int selRow = tree.getRowForLocation(e.getX(), e.getY());
                 TreePath selPath = tree.getPathForLocation(e.getX(), e.getY());
-                if(selRow != -1) {
-                    if(e.getClickCount() == 1) {
+                if (selRow != -1) {
+                    if (e.getClickCount() == 1) {
                         tree.setSelectionRow(selRow);
                         System.out.println(selPath);
-                    }
-                    else if(e.getClickCount() == 2) {
+                    } else if (e.getClickCount() == 2) {
                     }
                 }
             }
@@ -80,27 +77,29 @@ public class Test extends JFrame {
         this.setBounds(0, 0, 600, 600);
         this.setVisible(true);
 
-        ConcurrentHashMap<String, ConcurrentLinkedQueue<File>> duplicates = fileTree.collectDuplicates(path2, filter,1);
+///////// COLLECT DUPLICATES /////////
+        ConcurrentHashMap<String, ConcurrentLinkedQueue<File>> duplicates = fileTree.collectDuplicates(path2, filter, 1);
         //ConcurrentHashMap<String, ConcurrentLinkedQueue<File>> duplicates = fileTree.collectDuplicatesWithLimitedDepth(path2,filter,1,2);
 
+///////// DISPLAY DUPLICATES /////////
         fileTree.displayDuplicates(duplicates);
 
-        //Récupération des erreurs
+///////// COLLECT ERRORS /////////
         System.out.println("Erreurs : ");
         ArrayList<String> errorLogs = ErrorLogging.getInstance().getLogs();
-        for (String log: errorLogs) {
+        for (String log : errorLogs) {
             System.out.println(log);
         }
 
+///////// Displaying elapsed time /////////
         long stopTime = System.currentTimeMillis();
         long elapsedTime = stopTime - startTime;
         System.out.println("elapsedTime : " + elapsedTime + " ms");
-        System.out.println((double)elapsedTime/1000/60 + " minutes");
+        System.out.println((double) elapsedTime / 1000 / 60 + " minutes");
 
     }
 
     public static void main(String[] args) throws IOException {
-
         Test window = new Test();
     }
 
