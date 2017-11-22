@@ -2,7 +2,7 @@ package acdc.Services;
 
 /**
  * <b>Settings is a singleton (Initialization-on-demand holder idiom) that register the settings</b>
- * <p>
+ *
  * <p>
  * Useful to get the settings from anywhere.
  *

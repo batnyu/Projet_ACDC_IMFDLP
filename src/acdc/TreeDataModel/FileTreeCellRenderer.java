@@ -9,7 +9,7 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 
 /**
  * <b>FileTreeCellRenderer is a custom implementation of DefaultTreeCellRenderer</b>
- * <p>
+ *
  * <p>
  * It is used to modify the icon of empty file that are showed as leaf.
  * It also changes the root icon to a computer.

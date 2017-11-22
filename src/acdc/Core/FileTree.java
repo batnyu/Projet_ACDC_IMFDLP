@@ -17,7 +17,7 @@ import java.util.concurrent.ForkJoinPool;
 
 /**
  * <b>FileTree is the implementation of IMFDLP</b>
- * <p>
+ *
  * <p>
  * It's the Core of the application with all the features.
  *

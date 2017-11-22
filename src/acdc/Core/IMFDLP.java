@@ -59,7 +59,7 @@ public interface IMFDLP {
      * @param parallelism the level of parallelism.
      * @param maxDepth    the maximum depth from the root path
      * @return a ConcurrentHashmap with key string (hash) and Files as values
-     * @throws IOException
+     * @throws IOException file exception
      */
     ConcurrentHashMap<String, ConcurrentLinkedQueue<File>> collectDuplicatesWithLimitedDepth(
             String pathStr, Filter filter, int parallelism, int maxDepth) throws IOException;

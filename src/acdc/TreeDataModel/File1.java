@@ -6,11 +6,11 @@ import java.util.*;
 
 /**
  * <b>File1 is the class representing the data model of the tree</b>
- * <p>
+ *
  * <p>
  * I choose to implement my own data model and not DefaultMutableTreeNode
  * when I try to build a json cache. It was more easier than with a DefaultMutableTreeNode.
- * <p>
+ *
  * <p>
  * I copied the Services offered by DefaultMutableTreeNode in this class
  * to provide the basic actions and

@@ -12,9 +12,9 @@ import java.util.regex.Pattern;
 
 /**
  * <b>Filter is a class used to check if a path is valid</b>
- * <p>
+ *
  * <p>Filters available
- * <p>
+ *
  * <ul>
  * <li>Accepted extensions</li>
  * <li>Refused extensions</li>

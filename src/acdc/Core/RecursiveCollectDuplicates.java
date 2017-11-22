@@ -18,27 +18,28 @@ import static acdc.Core.FileTree.duplicates;
 
 /**
  * <b>RecursiveCollectDuplicates is the class allowing you to collect the duplicates.</b>
+ *
  * <p>
  * It uses the Fork/Join Framework to split the work.
  * It extends from RecursiveAction that return nothing.
  * Since I just add hash to the static duplicates field in FileTree class, I don't need to return anything.
  * For each folder, a class is instantiated.
  * You can choose the level of parallelism you want (how many worker threads to use).
- * <p>
+ *
  * <p>
  * To walk the file system tree, it uses WalkFileTree from Files.
  * When an IOException occurs, it adds the error message in the ErrorLogging class.
- * <p>
+ *
  * <p>
  * When Files.walkFileTree visit files, it uses the filter to collect only the duplicates of
  * the matching files.
- * <p>
+ *
  * <p>
  * Since it's in multithread with multiple instance of WalkFileTree,
  * the maxDepth coming with WalkFileTree doesn't work.
  * So, I use the pathNameCount of the current dir and I compare it to the original path requested.
  * With this, I join the folders and add the files only if the current depth is smaller than the max depth.
- * <p>
+ *
  * <p>
  * This class uses a cache file for the hashes. When listing the file tree, it checks for each file
  * if a hash was already built in the cache. If not, it hashes the file, If yes, it gets the hash from the cache.
@@ -211,7 +212,7 @@ public class RecursiveCollectDuplicates extends RecursiveAction {
      * @param filePath    the path of the file to search
      * @param searchQuery the string to search.
      * @return null if not found or the string found.
-     * @throws IOException
+     * @throws IOException file exception
      */
     public String searchUsingBufferedReader(String filePath, String searchQuery) throws IOException {
         searchQuery = searchQuery.trim();

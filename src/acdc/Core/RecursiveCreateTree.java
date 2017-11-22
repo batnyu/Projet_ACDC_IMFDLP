@@ -15,24 +15,25 @@ import java.util.regex.Pattern;
 
 /**
  * <b>RecursiveCreateTree is the class allowing you to get a tree.</b>
+ *
  * <p>
  * It uses the Fork/Join Framework to split the work.
  * It extends from RecursiveTask that allows to return a result.
  * I use it to return the build tree.
  * For each folder, a class is instantiated.
  * You can choose the level of parallelism you want (how many worker threads to use).
- * <p>
+ *
  * <p>
  * To walk the file system tree, it uses WalkFileTree from Files.
  * When an IOException occurs, it adds the error message in the ErrorLogging class.
- * <p>
+ *
  * <p>
  * When Files.walkFileTree visit files, it uses the filter to add only
  * the matching files.
- * <p>
+ *
  * <p>
  * During Files.walkFileTree, it adds the file size and adds it to the parent folder recursively.
- * <p>
+ *
  * <p>
  * Since it's in multithread with multiple instance of WalkFileTree,
  * the maxDepth coming with WalkFileTree doesn't work.
