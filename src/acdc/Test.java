@@ -4,6 +4,7 @@ import acdc.Core.FileTree;
 import acdc.Core.Utils.Filter;
 import acdc.Services.ErrorLogging;
 import acdc.Services.Settings;
+import acdc.TreeDataModel.File1;
 import acdc.TreeDataModel.FileTreeCellRenderer;
 
 import java.awt.event.MouseAdapter;
@@ -11,6 +12,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -24,7 +26,9 @@ public class Test extends JFrame {
         long startTime = System.currentTimeMillis();
 
         //String path2 = "C:" + File.separator;
-        String path2 = "D:" + File.separator;
+        //String path2 = "D:" + File.separator;
+        String path2 = "dossierTest";
+
 
 ///////// Set the path of the cacheHash.txt file /////////
         Settings.getInstance().setPathCacheHash("cacheHash.txt");
@@ -44,7 +48,8 @@ public class Test extends JFrame {
 
 ///////// GETTING A TREE /////////
         FileTree fileTree = FileTree.creerFileTree();
-        TreeModel model = fileTree.tree(path2, filter, 1);
+        //File1 root = fileTree.createTreeWithForkAndJoinWalkFileTree(Paths.get(path2), filter, 2, Paths.get(path2).getNameCount(), Integer.MAX_VALUE);
+        TreeModel model = fileTree.tree(path2, filter, 2);
         //TreeModel model = fileTree.tree(path2,filter,2,2);
 
         //Example of getting the root of the tree
@@ -96,6 +101,7 @@ public class Test extends JFrame {
         long elapsedTime = stopTime - startTime;
         System.out.println("elapsedTime : " + elapsedTime + " ms");
         System.out.println((double) elapsedTime / 1000 / 60 + " minutes");
+
 
     }
 

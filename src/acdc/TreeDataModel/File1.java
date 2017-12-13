@@ -98,7 +98,7 @@ public class File1 {
 
 
     public String toString() {
-        return filename + " " + String.valueOf(this.weight);
+        return filename + " (" + String.valueOf(this.weight) + " octets)";
     }
 
     /**

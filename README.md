@@ -1,4 +1,7 @@
 # Il me faut de la place
+>Projet ACDC - Fil A1 - Baptiste Vrignaud
+>
+>Code utilisé en phase 2 par Vivien Louradour
 
 ## Phase 1
 
@@ -16,7 +19,28 @@ Elle offre les services suivants:
 * Singleton pour stocker les erreurs d'accès aux fichiers.
 * Singleton pour stocker les paramètres (pour l'instant que le chemin vers le fichier cache des hashs).
 
-Code utilisé en phase 2 par Vivien Louradour
+### Utilisation du jar
 
-Baptiste Vrignaud
-Projet ACDC - Fil A1
+Le jar pointe par défaut sur le dossierTest disponible dans le repo.
+
+#####Commande de base
+>Affiche l'arbre et les doublons.
+
+    java -jar Projet_ACDC_IMFDLP.jar -tree -duplicates
+
+ #####Options utilisables
+>Filtre l'arbre et la recherche de doublons avec un pattern
+
+*-regex=pattern*
+
+    java -jar Projet_ACDC_IMFDLP.jar -regex='jpg|txt' -tree -duplicates
+>Tous les fichiers plus grand que le paramètre
+
+*-gtWeight=nbOctets* 
+
+    java -jar Projet_ACDC_IMFDLP.jar -gtWeight=60000 -tree -duplicates
+>Tous les fichiers plus petit que le paramètre
+
+*-lwWeight=nbOctets* 
+
+    java -jar Projet_ACDC_IMFDLP.jar -lwWeight=60000 -tree -duplicates

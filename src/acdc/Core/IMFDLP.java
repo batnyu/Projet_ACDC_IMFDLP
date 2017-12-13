@@ -1,6 +1,7 @@
 package acdc.Core;
 
 import acdc.Core.Utils.Filter;
+import acdc.TreeDataModel.File1;
 
 import javax.swing.tree.TreeModel;
 import java.io.File;
@@ -63,4 +64,11 @@ public interface IMFDLP {
      */
     ConcurrentHashMap<String, ConcurrentLinkedQueue<File>> collectDuplicatesWithLimitedDepth(
             String pathStr, Filter filter, int parallelism, int maxDepth) throws IOException;
+
+    /**
+     * Display the tree as a string?
+     *
+     * @param root of the tree
+     */
+    void display(File1 root);
 }

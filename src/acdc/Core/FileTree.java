@@ -57,7 +57,7 @@ public class FileTree implements IMFDLP {
      * @param maxDepth      to limit the depth of the tree.
      * @return a structure representing the tree (File1)
      */
-    private File1 createTreeWithForkAndJoinWalkFileTree(Path path, Filter filter, int parallelism, int pathNameCount, int maxDepth) {
+    public File1 createTreeWithForkAndJoinWalkFileTree(Path path, Filter filter, int parallelism, int pathNameCount, int maxDepth) {
         File1 root;
 
         RecursiveCreateTree w = new RecursiveCreateTree(path, pathNameCount, maxDepth, filter);
@@ -226,22 +226,22 @@ public class FileTree implements IMFDLP {
      * @param duplicates to display
      */
     public void displayDuplicates(Map<String, ConcurrentLinkedQueue<File>> duplicates) {
-        System.out.println("\n\n--- DOUBLONS ---\n");
-
+        StringBuilder result = new StringBuilder();
         int compteur = 0;
 
         for (Map.Entry<String, ConcurrentLinkedQueue<File>> entry : duplicates.entrySet()) {
             //Useless condition if you clean duplicates with the cleanDuplicates method of FileTree class.
             if (entry.getValue().size() > 1) {
-                System.out.println("hash : " + entry.getKey());
+                result.append("hash : ").append(entry.getKey()).append("\n");
                 for (File file : entry.getValue()) {
-                    System.out.println(file.getAbsolutePath());
+                    result.append(file.getAbsolutePath()).append("\n");
                 }
-                System.out.println("");
+                result.append("\n");
                 compteur++;
             }
         }
-        System.out.println("nb : " + compteur);
+        System.out.println("\n--- DUPLICATES ("+ compteur +") ---\n");
+        System.out.print(result.toString());
     }
 
     /**
@@ -285,4 +285,33 @@ public class FileTree implements IMFDLP {
 
         }
     }
+
+    /**
+     * String representation of the file tree
+     */
+    @Override
+    public void display(File1 root) {
+        System.out.println("\n--- TREE ---\n");
+        String result = "";
+        Enumeration<File1> en = root.preorderEnumeration();
+        while (en.hasMoreElements()) {
+            File1 node = en.nextElement();
+            String nodeValue = node.toString();
+            boolean isDirectory = node.isDirectory;
+            String indent = "";
+            while (node.getParent() != null) {
+                indent += "    ";
+                node = node.getParent();
+            }
+            if(isDirectory){
+                indent += "+";
+            } else {
+                indent += "-";
+            }
+            result += indent + nodeValue + "\n";
+        }
+        System.out.println(result);
+    }
+
+
 }
