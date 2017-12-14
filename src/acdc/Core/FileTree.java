@@ -27,7 +27,7 @@ import java.util.concurrent.ForkJoinPool;
 public class FileTree implements IMFDLP {
 
     /**
-     * ConcurrentHashmap with string as key and ConcurrentLinkedQueue<File> as values.
+     * ConcurrentHashmap with string as key and ConcurrentLinkedQueue&lt;File&gt; as values.
      * Using of Concurrent classes because of several threads writing in this.
      */
     public static ConcurrentHashMap<String, ConcurrentLinkedQueue<File>> duplicates = new ConcurrentHashMap<>();

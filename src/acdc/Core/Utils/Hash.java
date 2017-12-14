@@ -14,17 +14,20 @@ import java.security.NoSuchAlgorithmException;
  * <b>Hash is a class with 2 different way of hashing with the MD5 algorithm.</b>
  *
  * <ul>
- * <li>sampleHashFile</li>
- * <p>
- * This hash has a constant complexity.
+ * <li>
+ * <p>sampleHashFile
+ * <p>This hash has a constant complexity.
  * It takes samples at the beginning, in the middle and at the end and hash it.
  * It's quick but can output some errors.
+ * </li>
  *
- * <li>md5ofFile</li>
- * <p>
- * This hash complexity depends on the file size.
+ * <li>
+ * <p>md5ofFile
+ *
+ * <p>This hash complexity depends on the file size.
  * It hashes all the file.
  * It's very slow but can't output errors.
+ * </li>
  * </ul>
  *
  * @author Baptiste

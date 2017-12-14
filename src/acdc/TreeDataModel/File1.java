@@ -433,6 +433,7 @@ public class File1 {
      * false if <code>aNode</code> is null
      * @see #getSharedAncestor
      * @see #getRoot
+     * @param aNode the node
      */
     public boolean isNodeRelated(File1 aNode) {
         return (aNode != null) && (getRoot() == aNode.getRoot());
@@ -632,7 +633,7 @@ public class File1 {
     /**
      * Creates and returns an enumeration that traverses the subtree rooted at
      * this node in preorder.  The first node returned by the enumeration's
-     * <code>nextElement()</code> method is this node.<P>
+     * <code>nextElement()</code> method is this node.
      * <p>
      * Modifying the tree by inserting, removing, or moving a node invalidates
      * any enumerations created before the modification.
@@ -648,7 +649,7 @@ public class File1 {
      * Creates and returns an enumeration that traverses the subtree rooted at
      * this node in postorder.  The first node returned by the enumeration's
      * <code>nextElement()</code> method is the leftmost leaf.  This is the
-     * same as a depth-first traversal.<P>
+     * same as a depth-first traversal.
      * <p>
      * Modifying the tree by inserting, removing, or moving a node invalidates
      * any enumerations created before the modification.
@@ -664,7 +665,7 @@ public class File1 {
     /**
      * Creates and returns an enumeration that traverses the subtree rooted at
      * this node in breadth-first order.  The first node returned by the
-     * enumeration's <code>nextElement()</code> method is this node.<P>
+     * enumeration's <code>nextElement()</code> method is this node.
      * <p>
      * Modifying the tree by inserting, removing, or moving a node invalidates
      * any enumerations created before the modification.
@@ -680,7 +681,7 @@ public class File1 {
      * Creates and returns an enumeration that traverses the subtree rooted at
      * this node in depth-first order.  The first node returned by the
      * enumeration's <code>nextElement()</code> method is the leftmost leaf.
-     * This is the same as a postorder traversal.<P>
+     * This is the same as a postorder traversal.
      * <p>
      * Modifying the tree by inserting, removing, or moving a node invalidates
      * any enumerations created before the modification.
@@ -701,7 +702,7 @@ public class File1 {
      * node, and so on, and finally returns this node.  Creation of the
      * enumeration is O(m) where m is the number of nodes between this node
      * and <code>ancestor</code>, inclusive.  Each <code>nextElement()</code>
-     * message is O(1).<P>
+     * message is O(1).
      * <p>
      * Modifying the tree by inserting, removing, or moving a node invalidates
      * any enumerations created before the modification.
@@ -712,6 +713,7 @@ public class File1 {
      *                                  not an ancestor of this node
      * @see #isNodeAncestor
      * @see #isNodeDescendant
+     * @param ancestor the root to begins with
      */
     public Enumeration pathFromAncestorEnumeration(File1 ancestor) {
         return new PathBetweenNodesEnumeration(ancestor, this);
@@ -728,6 +730,7 @@ public class File1 {
      *
      * @return true if <code>aNode</code> is a child of this node; false if
      * <code>aNode</code> is null
+     * @param aNode the node to check
      */
     public boolean isNodeChild(File1 aNode) {
         boolean retval;
@@ -789,6 +792,7 @@ public class File1 {
      * @throws IllegalArgumentException if <code>aChild</code> is
      *                                  null or is not a child of this node
      * @see #children
+     * @param aChild the child before
      */
     public File1 getChildAfter(File1 aChild) {
         if (aChild == null) {
@@ -820,6 +824,7 @@ public class File1 {
      * <code>aChild</code>
      * @throws IllegalArgumentException if <code>aChild</code> is null
      *                                  or is not a child of this node
+     * @param aChild the child after
      */
     public File1 getChildBefore(File1 aChild) {
         if (aChild == null) {
