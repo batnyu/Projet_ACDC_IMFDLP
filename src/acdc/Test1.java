@@ -2,12 +2,14 @@ package acdc;
 
 import acdc.Core.FileTree;
 import acdc.Core.Utils.Filter;
+import acdc.Services.ErrorLogging;
 import acdc.Services.Settings;
 import acdc.TreeDataModel.File1;
 
 import javax.swing.tree.TreeModel;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -70,6 +72,13 @@ public class Test1 {
             } else if (arg.contains("-duplicates")) {
                 ConcurrentHashMap<String, ConcurrentLinkedQueue<File>> duplicates = fileTree.collectDuplicates(path, filter, parallelism);
                 fileTree.displayDuplicates(duplicates);
+
+            } else if (arg.contains("-errors")) {
+                ArrayList<String> errorLogs = ErrorLogging.getInstance().getLogs();
+                System.out.println("Errors (" + errorLogs.size() +")");
+                for (String log : errorLogs) {
+                    System.out.println(log);
+                }
 
             } else {
 

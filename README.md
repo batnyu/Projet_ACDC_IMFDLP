@@ -38,6 +38,7 @@ Le jar pointe par défaut sur le dossierTest disponible dans le repo.
     *-regex=pattern* (à utiliser avant les commandes tree et duplicates car elles se servent de ce filtre)
 
         java -jar Projet_ACDC_IMFDLP.jar -regex='jpg|txt' -tree -duplicates
+        java -jar Projet_ACDC_IMFDLP.jar -regex=canelle -tree -duplicates
     
 * Accepter tous les fichiers plus grand que le paramètre
 
@@ -69,3 +70,10 @@ Le jar pointe par défaut sur le dossierTest disponible dans le repo.
     *-duplicates=depth* 
 
         java -jar Projet_ACDC_IMFDLP.jar -duplicates=2
+        
+* Afficher les erreurs parvenu lors de la construction de l'arbre et de la recherche des doublons
+(exemple: Accès non autorisé à un fichier)
+
+    *-errors* 
+
+        java -jar Projet_ACDC_IMFDLP.jar -tree -duplicates -errors
