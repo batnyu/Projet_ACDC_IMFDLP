@@ -23,7 +23,7 @@ Elle offre les services suivants:
 
 Le jar pointe par défaut sur le dossierTest disponible dans le repo.
 
-####Commandes de base
+#### Commandes de base
 * Affiche l'arbre
 
     java -jar Projet_ACDC_IMFDLP.jar -tree
@@ -32,7 +32,7 @@ Le jar pointe par défaut sur le dossierTest disponible dans le repo.
 
     java -jar Projet_ACDC_IMFDLP.jar -duplicates
 
-####Options utilisables
+#### Options utilisables
 * Filtre l'arbre et la recherche de doublons avec un pattern
 
 *-regex=pattern* (à utiliser avant les commandes tree et duplicates car elles se servent de ce filtre)
