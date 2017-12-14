@@ -77,3 +77,55 @@ Le jar pointe par défaut sur le dossierTest disponible dans le repo.
     *-errors* 
 
         java -jar Projet_ACDC_IMFDLP.jar -tree -duplicates -errors
+        
+### Difficultés rencontrés
+
+* **Framework multi-thread Fork/Join**
+
+    Je n'ai pas réussi à optimiser le fonctionnement du framework. A la base, il est optimisé pour un arbre binaire équilibré
+    où chaque tâche élémentaire est la même. Or pour un système de fichiers, l'arbre n'est pas équilibré.
+    Il faut donc déterminer des conditions pour la tâche élémentaire. Mais je n'ai pas eu le temps.
+    La tâche élémentaire de mon projet est le répertoire. A chaque répertoire, je crée une nouvelle instance de la classe Recursive.
+    
+    La doc en parle (http://www.oracle.com/technetwork/articles/java/fork-join-422606.html) : 
+    
+    >In particular, the “map” phase that identifies chunks of data “small enough” to be processed 
+    independently in an efficient manner does not know the data space topology in advance. 
+    This is especially true for graph-based and tree-based data structures. 
+    In those cases, algorithms should create hierarchies of “divisions,” 
+    waiting for subtasks to complete before returning a partial result.
+    
+* **Collecter les doublons en multi-thread**
+
+    J'ai du utiliser une ConcurrentHashMap avec une ConcurrentLinkedQueue pour que les threads en parallèle puissent écrire dans la hashmap en même temps.
+
+* **Limiter la profondeur en multi-thread**
+
+    Sachant que j'utilise un WalkFileTree par répertoire, je ne peux pas utiliser sa fonction de MAX_DEPTH.
+    J'ai donc utilisé pathNameCount qui me permet de vérifier à combien de niveau de profondeur je suis par rapport à mon chemin de base.
+
+* **Effacer les dossiers vides quand on filtre**
+
+    Au début, pour régler ce problème, après la construction de l'arbre, si le filtre était activé, je parcourais les noeuds de l'arbre que j'avais construit
+    afin de supprimer les dossiers vides.
+    
+    Je teste maintenant à la construction. Je n'ajoute pas à mon arbre les dossiers vides si un filtre est activé.
+
+* **Cache**
+
+    Au début, j'ai voulu utiliser le json pour créer le cache. J'ai essayé avec JsonPath pour extraire facilement les données,
+    ensuite avec JsonSurf pour utiliser un streaming. Avec ses deux libraires, je n'ai pas réussi 
+    
+    Je me suis ensuite servi de la libraire gson de Google. Cette libraire a l'avantage de pouvoir convertir un json en ma structure et inversément. 
+     C'est pourquoi, j'ai abandonné DefaultMutableTreeNode pour ma propre structure. En effet, DefaultMutableTreeNode sépare 
+     la structure des données ce qui est incompatible avec la conversion en json. 
+     
+     J'ai réussi à implémenter un peu près la lecture du json qu'on peut voir dans CacheUpdate.json. Mais c'était très laborieux et je n'ai pas eu le temps de finir.
+
+    Je me suis donc rabattu vers un simple fichier pour stocker les hashs de mes fichiers avec un timestamp.
+    Je mets en cache juste les hashs de mes fichiers sachant qu'on sera obligé de toute façon de reparcourir le système de fichier
+    à chaque démarrage de l'application car je n'ai pas implémenté de hooks qui aurait permis de surveiller le système de fichiers
+    et de faire un cache optimal.
+    
+    Sachant qu'avec le hash qui prend des échantillons, ce sera surement plus lent que de chercher le hash dans tous le fichier que de le recalculer.
+    Le cache est donc plutôt utilisable avec le hash lent de l'intégralité des fichiers.
