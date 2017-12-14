@@ -26,46 +26,46 @@ Le jar pointe par défaut sur le dossierTest disponible dans le repo.
 #### Commandes de base
 * Affiche l'arbre
 
-    java -jar Projet_ACDC_IMFDLP.jar -tree
+        java -jar Projet_ACDC_IMFDLP.jar -tree
     
 * Affiche les doublons
 
-    java -jar Projet_ACDC_IMFDLP.jar -duplicates
+        java -jar Projet_ACDC_IMFDLP.jar -duplicates
 
 #### Options utilisables
 * Filtre l'arbre et la recherche de doublons avec un pattern
 
-*-regex=pattern* (à utiliser avant les commandes tree et duplicates car elles se servent de ce filtre)
+    *-regex=pattern* (à utiliser avant les commandes tree et duplicates car elles se servent de ce filtre)
 
-    java -jar Projet_ACDC_IMFDLP.jar -regex='jpg|txt' -tree -duplicates
+        java -jar Projet_ACDC_IMFDLP.jar -regex='jpg|txt' -tree -duplicates
     
 * Accepter tous les fichiers plus grand que le paramètre
 
-*-gtWeight=nbOctets* 
+    *-gtWeight=nbOctets* 
 
-    java -jar Projet_ACDC_IMFDLP.jar -gtWeight=60000 -tree -duplicates
+        java -jar Projet_ACDC_IMFDLP.jar -gtWeight=60000 -tree -duplicates
     
 * Accepter tous les fichiers plus petit que le paramètre
 
-*-lwWeight=nbOctets* 
+    *-lwWeight=nbOctets* 
 
-    java -jar Projet_ACDC_IMFDLP.jar -lwWeight=60000 -tree -duplicates
+        java -jar Projet_ACDC_IMFDLP.jar -lwWeight=60000 -tree -duplicates
     
 * Utiliser un niveau de parallèlisme pour la création de l'arbre et la recherche de doublons 
 (à placer avant -tree et -duplicates)
 
-*-parallelism=nb* 
+    *-parallelism=nb* 
 
-    java -jar Projet_ACDC_IMFDLP.jar -parallelism=2 -tree -duplicates
+        java -jar Projet_ACDC_IMFDLP.jar -parallelism=2 -tree -duplicates
     
 * Restreint l'arbre à une profondeur de 2.
 
-*-tree=depth* 
+    *-tree=depth* 
 
-    java -jar Projet_ACDC_IMFDLP.jar -tree=2
+        java -jar Projet_ACDC_IMFDLP.jar -tree=2
     
 * Restreint la recherche des doublons à l'arbre de profondeur 2.
 
-*-duplicates=depth* 
+    *-duplicates=depth* 
 
-    java -jar Projet_ACDC_IMFDLP.jar -duplicates=2
+        java -jar Projet_ACDC_IMFDLP.jar -duplicates=2
