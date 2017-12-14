@@ -78,6 +78,62 @@ Le jar pointe par défaut sur le dossierTest disponible dans le repo.
 
         java -jar Projet_ACDC_IMFDLP.jar -tree -duplicates -errors
         
+### Organisation du projet
+* **Structure de données**
+
+    Ma structure est composée d'une classe File1 qui possède un vecteur de File1 (Composite).
+    File1 possède tous les attributs caractérisant un répertoire/fichier (nom, path, poids, dernier temps de modif, dossier ou non, enfants). J'ai récupéré toutes les méthodes de DefaultMutableTreeNode au cas où celui qui reprendrait mon code en aurait besoin.
+    
+* **Modèle d'arbre**
+
+    Comme le tutoriel de JTree indique pour créer sa propre structure de données et se passer de DefaultMutableTreeNode, j'ai créé 
+    mon propre FileTreeModel qui agrège ma structure de données File1 et implémente TreeModel.
+    
+* **Core**
+
+   * FileTree
+   
+       C'est la classe qui possède la logique de base de l'application. Elle utilise les classes
+       RecursiveCollectDuplicates et RecursiveCreateTree.
+       
+   * RecursiveCollectDuplicates
+   
+       Utilise WalkFileTree et Fork/Join pour collecter les doublons et les stocker dans la ConcurrentHashMap de FileTree.
+       
+   * RecursiveCreateTree
+   
+       Utilise WalkFileTree et Fork/Join pour parcourir le système de fichiers et créer une structure de données File1.
+    
+* **Utils**
+
+    * Filter
+
+        Classe qui permet de filtrer la construction d'un arbre et la recherche des doublons
+        
+    * Hash
+    
+        Classe qui possède deux hashs
+        
+        * Hash partiel
+        
+            Prend trois échantillons au début, au milieu et à la fin du fichier et est donc indépendant de la taille du fichier.
+            
+        * Hash complet
+        
+            L'intégralité du fichier est hashé.
+    
+* **Services**
+
+    * Settings
+        Ce singleton permet de centraliser tous les paramètres de l'application pour pouvoir y accéder en lecture et écriture de         n'importe où.
+    * ErrorLogging
+        Ce singleton permet de centraliser les erreurs liés au I/O quand on parcourt le système de fichiers.
+    
+* **Renderer du JTree**
+
+    J'ai du implémenté mon propre FileTreeCellRenderer qui hérite de DefaultTreeCellRenderer afin de
+    corriger les icônes pour les dossiers vides qui étaient par défaut des feuilles.
+
 ### Difficultés rencontrés
 
 * **Framework multi-thread Fork/Join**
