@@ -23,24 +23,49 @@ Elle offre les services suivants:
 
 Le jar pointe par défaut sur le dossierTest disponible dans le repo.
 
-#####Commande de base
->Affiche l'arbre et les doublons.
+####Commandes de base
+* Affiche l'arbre
 
-    java -jar Projet_ACDC_IMFDLP.jar -tree -duplicates
+    java -jar Projet_ACDC_IMFDLP.jar -tree
+    
+* Affiche les doublons
 
- #####Options utilisables
->Filtre l'arbre et la recherche de doublons avec un pattern
+    java -jar Projet_ACDC_IMFDLP.jar -duplicates
 
-*-regex=pattern*
+####Options utilisables
+* Filtre l'arbre et la recherche de doublons avec un pattern
+
+*-regex=pattern* (à utiliser avant les commandes tree et duplicates car elles se servent de ce filtre)
 
     java -jar Projet_ACDC_IMFDLP.jar -regex='jpg|txt' -tree -duplicates
->Tous les fichiers plus grand que le paramètre
+    
+* Accepter tous les fichiers plus grand que le paramètre
 
 *-gtWeight=nbOctets* 
 
     java -jar Projet_ACDC_IMFDLP.jar -gtWeight=60000 -tree -duplicates
->Tous les fichiers plus petit que le paramètre
+    
+* Accepter tous les fichiers plus petit que le paramètre
 
 *-lwWeight=nbOctets* 
 
     java -jar Projet_ACDC_IMFDLP.jar -lwWeight=60000 -tree -duplicates
+    
+* Utiliser un niveau de parallèlisme pour la création de l'arbre et la recherche de doublons 
+(à placer avant -tree et -duplicates)
+
+*-parallelism=nb* 
+
+    java -jar Projet_ACDC_IMFDLP.jar -parallelism=2 -tree -duplicates
+    
+* Restreint l'arbre à une profondeur de 2.
+
+*-tree=depth* 
+
+    java -jar Projet_ACDC_IMFDLP.jar -tree=2
+    
+* Restreint la recherche des doublons à l'arbre de profondeur 2.
+
+*-duplicates=depth* 
+
+    java -jar Projet_ACDC_IMFDLP.jar -duplicates=2
