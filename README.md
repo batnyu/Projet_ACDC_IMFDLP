@@ -3,6 +3,8 @@
 >
 >Code utilisé en phase 2 par Vivien Louradour
 
+[Lien vers le compte-rendu de la phase 1](/CompteRendu_Partie1/designBackend.md)
+
 ## Contexte du projet
 
 Ce projet a pour but de développer une application multi-plateforme en java capable d'analyser un système de fichiers, 
@@ -23,5 +25,3 @@ Elle offre les services suivants:
 * Filtrage des fichiers par expression régulière, nom, nom refusé, extentions, extensions refusées, date et poids.
 * Singleton pour stocker les erreurs d'accès aux fichiers.
 * Singleton pour stocker les paramètres (pour l'instant que le chemin vers le fichier cache des hashs).
-
-[Lien vers le compte-rendu de la phase 1](/CompteRendu_Partie1/designBackend.md)

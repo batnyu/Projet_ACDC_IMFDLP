@@ -6,6 +6,10 @@ Le jar pointe par défaut sur le dossierTest disponible dans le repo.
 
 ### Commandes de base
 
+* Afficher l'aide
+
+        java -jar Projet_ACDC_IMFDLP.jar -help
+
 * Affiche l'arbre
 
         java -jar Projet_ACDC_IMFDLP.jar -tree
@@ -66,7 +70,7 @@ Le jar pointe par défaut sur le dossierTest disponible dans le repo.
         
 ## 2 - Organisation du projet
 
-La documentation est disponible dans le dossier /javadoc.
+[La documentation est disponible ici.](/javadoc)
 
 ### 2.1 - Recherche en amont
 
