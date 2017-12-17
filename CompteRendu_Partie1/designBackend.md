@@ -5,6 +5,7 @@
 Le jar pointe par défaut sur le dossierTest disponible dans le repo.
 
 ### Commandes de base
+
 * Affiche l'arbre
 
         java -jar Projet_ACDC_IMFDLP.jar -tree
@@ -12,6 +13,10 @@ Le jar pointe par défaut sur le dossierTest disponible dans le repo.
 * Affiche les doublons
 
         java -jar Projet_ACDC_IMFDLP.jar -duplicates
+        
+* Change le dossier cible (à mettre avant -tree et -duplicates, ne pas oublier les doubles quotes)
+
+        java -jar Projet_ACDC_IMFDLP.jar -dir="C:\Users\Roger\Desktop\Nouveau dossier" -tree
 
 ### Options utilisables
 * Filtre l'arbre et la recherche de doublons avec un pattern
@@ -61,7 +66,7 @@ Le jar pointe par défaut sur le dossierTest disponible dans le repo.
         
 ## 2 - Organisation du projet
 
-[Lien vers la javadoc](javadoc/index.html)
+La documentation est disponible dans le dossier /javadoc.
 
 ### 2.1 - Recherche en amont
 
@@ -78,7 +83,11 @@ Pour ma structure de données, j'avais deux choix :
 - Utiliser DefaultMutableTreeNode, un objet Java avec déjà toutes les fonctionnalités nécessaire et compatible avec un JTree.
 - Créer ma propre structure de données avec le pattern Composite.
 
-J'ai choisi d'utiliser DefaultMutableTreeNode car je n'avais pas d'intérêt à créer ma propre structure.
+J'ai choisi d'utiliser DefaultMutableTreeNode car je n'avais pas d'intérêt à créer ma propre structure. 
+Mais par la suite, j'ai implémenté ma propre structure pour le cache (voir les difficultés rencontrées pour le cache).
+
+En ce qui concerne le multi-threading, j'ai fait quelques recherches et j'ai trouvé le framework Fork/Join qui m'a paru être une bonne solution pour cette application.
+Il permet de paralléliser des opérations récursives.
 
 ### 2.2 - Architecture
 
@@ -101,11 +110,13 @@ J'ai choisi d'utiliser DefaultMutableTreeNode car je n'avais pas d'intérêt à 
        
    * RecursiveCollectDuplicates
    
-       Utilise WalkFileTree et Fork/Join pour collecter les doublons et les stocker dans la ConcurrentHashMap de FileTree.
+       Cette classe utilise WalkFileTree et Fork/Join pour collecter les doublons et les stocker dans la ConcurrentHashMap de FileTree.
        
    * RecursiveCreateTree
    
-       Utilise WalkFileTree et Fork/Join pour parcourir le système de fichiers et créer une structure de données File1.
+       Cette classe utilise WalkFileTree et Fork/Join pour parcourir le système de fichiers et créer une structure de données File1.
+       J'ai choisi de calculer les poids des répertoire à la construction car le but du projet est d'avoir une vision claire de ce qui prend le plus de place.
+       L'arbre construit aura donc toutes les bonnes tailles de répertoire.
     
 * **Utils**
 
@@ -128,8 +139,10 @@ J'ai choisi d'utiliser DefaultMutableTreeNode car je n'avais pas d'intérêt à 
 * **Services**
 
     * Settings
-        Ce singleton permet de centraliser tous les paramètres de l'application pour pouvoir y accéder en lecture et écriture de         n'importe où.
+    
+        Ce singleton permet de centraliser tous les paramètres de l'application pour pouvoir y accéder en lecture et écriture de n'importe où.
     * ErrorLogging
+    
         Ce singleton permet de centraliser les erreurs liés au I/O quand on parcourt le système de fichiers.
     
 * **Renderer du JTree**
@@ -143,10 +156,10 @@ J'ai choisi d'utiliser DefaultMutableTreeNode car je n'avais pas d'intérêt à 
 
     Je n'ai pas réussi à optimiser le fonctionnement du framework. A la base, il est optimisé pour un arbre binaire équilibré
     où chaque tâche élémentaire est la même. Or pour un système de fichiers, l'arbre n'est pas équilibré.
-    Il faut donc déterminer des conditions pour la tâche élémentaire. Mais je n'ai pas eu le temps.
+    Il faut donc déterminer des conditions pour la tâche élémentaire. Mais je n'ai pas eu le temps et l'inspiration pour le faire.
     La tâche élémentaire de mon projet est le répertoire. A chaque répertoire, je crée une nouvelle instance de la classe Recursive.
     
-    La doc en parle (http://www.oracle.com/technetwork/articles/java/fork-join-422606.html) : 
+    La doc en parle ici : http://www.oracle.com/technetwork/articles/java/fork-join-422606.html
     
     >In particular, the “map” phase that identifies chunks of data “small enough” to be processed 
     independently in an efficient manner does not know the data space topology in advance. 
@@ -160,8 +173,9 @@ J'ai choisi d'utiliser DefaultMutableTreeNode car je n'avais pas d'intérêt à 
 
 * **Limiter la profondeur en multi-thread**
 
-    Sachant que j'utilise un WalkFileTree par répertoire, je ne peux pas utiliser sa fonction de MAX_DEPTH.
-    J'ai donc utilisé pathNameCount qui me permet de vérifier à combien de niveau de profondeur je suis par rapport à mon chemin de base.
+    Sachant que j'utilise une instance de WalkFileTree par répertoire, je ne peux pas utiliser sa fonctionnalité MAX_DEPTH qui permet de limiter le parcours en profondeur.
+    J'ai donc utilisé pathNameCount qui me permet de vérifier à combien de niveau de profondeur je me trouve par rapport à mon chemin de base.
+    Je n'ajoute pas les répertoires et les fichiers qui ont un chemin supérieur à ma limite. Mais j'ai choisi de les parcourir quand même afin de calculer la taille de tous les dossiers.
 
 * **Effacer les dossiers vides quand on filtre**
 
@@ -172,10 +186,11 @@ J'ai choisi d'utiliser DefaultMutableTreeNode car je n'avais pas d'intérêt à 
 
 * **Cache**
 
-    Au début, j'ai voulu utiliser le json pour créer le cache. J'ai essayé avec JsonPath pour extraire facilement les données,
-    ensuite avec JsonSurf pour utiliser un streaming. Avec ses deux libraires, je n'ai pas réussi 
+    Au début, j'ai voulu utiliser le json pour le cache. J'ai essayé avec JsonPath pour extraire facilement les données,
+    ensuite avec JsonSurf pour utiliser un streaming. Avec ses deux libraires, je n'ai pas réussi. 
     
-    Je me suis ensuite servi de la libraire gson de Google. Cette libraire a l'avantage de pouvoir convertir un json en ma structure et inversément. 
+    Je me suis ensuite servi de la libraire gson de Google. Cette libraire a l'avantage de pouvoir convertir un json en ma structure et inversément
+    avec simplement la commande  
      C'est pourquoi, j'ai abandonné DefaultMutableTreeNode pour ma propre structure. En effet, DefaultMutableTreeNode sépare 
      la structure des données ce qui est incompatible avec la conversion en json. 
      
@@ -186,5 +201,5 @@ J'ai choisi d'utiliser DefaultMutableTreeNode car je n'avais pas d'intérêt à 
     à chaque démarrage de l'application car je n'ai pas implémenté de hooks qui aurait permis de surveiller le système de fichiers
     et de faire un cache optimal.
     
-    Sachant qu'avec le hash qui prend des échantillons, ce sera surement plus lent que de chercher le hash dans tous le fichier que de le recalculer.
+    Sachant qu'avec le hash qui prend des échantillons, ce sera surement plus lent de chercher le hash enregistré dans tous le fichier que de le recalculer.
     Le cache est donc plutôt utilisable avec le hash lent de l'intégralité des fichiers.

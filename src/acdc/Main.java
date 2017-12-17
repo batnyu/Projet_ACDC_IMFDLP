@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class Test1 {
+public class Main {
 
     public static void main(String[] args) throws Exception {
         String path = "dossierTest";
@@ -30,8 +30,11 @@ public class Test1 {
             if(arg.contains("=")){
                 param = getParam(arg);
             }
+            if (arg.contains("-dir=")) {
+                path = param.replace("\\",File.separator);;
+                System.out.println("\nDirectory : '" + param + "'");
 
-            if (arg.contains("-regex=")) {
+            } else if (arg.contains("-regex=")) {
 
                 filter.setPattern(param);
                 System.out.println("\nFilter : all the files containing '" + param + "'");

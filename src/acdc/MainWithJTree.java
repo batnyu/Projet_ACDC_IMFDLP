@@ -4,7 +4,6 @@ import acdc.Core.FileTree;
 import acdc.Core.Utils.Filter;
 import acdc.Services.ErrorLogging;
 import acdc.Services.Settings;
-import acdc.TreeDataModel.File1;
 import acdc.TreeDataModel.FileTreeCellRenderer;
 
 import java.awt.event.MouseAdapter;
@@ -12,7 +11,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -20,9 +18,9 @@ import javax.swing.*;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
-public class Test extends JFrame {
+public class MainWithJTree extends JFrame {
 
-    public Test() throws IOException {
+    public MainWithJTree() throws IOException {
         long startTime = System.currentTimeMillis();
 
         //String path2 = "C:" + File.separator;
@@ -106,7 +104,7 @@ public class Test extends JFrame {
     }
 
     public static void main(String[] args) throws IOException {
-        Test window = new Test();
+        MainWithJTree window = new MainWithJTree();
     }
 
 }
