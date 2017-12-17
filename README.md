@@ -3,7 +3,12 @@
 >
 >Code utilisé en phase 2 par Vivien Louradour
 
-## Phase 1
+## Contexte du projet
+
+Ce projet a pour but de développer une application multi-plateforme en java capable d'analyser un système de fichiers, 
+montrer ce qui prend le plus de place et trouver les doublons.
+
+## Fonctionnalités présentes dans la phase 1
 
 Pour cette première phase du projet, la partie fonctionnelle a été implémentée.
 Elle offre les services suivants:

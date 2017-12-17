@@ -91,6 +91,8 @@ Il permet de paralléliser des opérations récursives.
 
 ### 2.2 - Architecture
 
+Voir la javadoc pour plus de précisions.
+
 * **Structure de données**
 
     Ma structure est composée d'une classe File1 qui possède un vecteur de File1 (Pattern Composite).
@@ -98,15 +100,15 @@ Il permet de paralléliser des opérations récursives.
     
 * **Modèle d'arbre**
 
-    Comme le tutoriel de JTree indique pour créer sa propre structure de données et se passer de DefaultMutableTreeNode, j'ai créé 
-    mon propre FileTreeModel qui agrège ma structure de données File1 et implémente TreeModel.
+    J'ai suivi le tutoriel de Java (https://docs.oracle.com/javase/tutorial/uiswing/components/tree.html#data) qui indique commment créer sa propre structure de données et se passer de DefaultMutableTreeNode.
+    J'ai donc créé mon propre FileTreeModel qui agrège ma structure de données File1 et implémente TreeModel.
     
 * **Core**
 
    * FileTree
    
        C'est la classe qui possède la logique de base de l'application. Elle utilise les classes
-       RecursiveCollectDuplicates et RecursiveCreateTree.
+       RecursiveCollectDuplicates et RecursiveCreateTree. Elle stocke les doublons et possède des méthodes pour obtenir l'arbre en TreeModel.
        
    * RecursiveCollectDuplicates
    
