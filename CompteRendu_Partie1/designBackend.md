@@ -115,7 +115,7 @@ Il permet de paralléliser des opérations récursives.
    * RecursiveCreateTree
    
        Cette classe utilise WalkFileTree et Fork/Join pour parcourir le système de fichiers et créer une structure de données File1.
-       J'ai choisi de calculer les poids des répertoire à la construction car le but du projet est d'avoir une vision claire de ce qui prend le plus de place.
+       J'ai choisi de calculer les poids des répertoires à la construction car le but du projet est d'avoir une vision claire de ce qui prend le plus de place.
        L'arbre construit aura donc toutes les bonnes tailles de répertoire.
     
 * **Utils**
